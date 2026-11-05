@@ -177,7 +177,7 @@ local function fill_header(p, h)
   local row = h.add{type = "flow", direction = "horizontal"}
   row.style.horizontal_spacing = 16
   -- четыре одинаковые колонки с тонкими разделителями: ровно и места не прыгают от длины текста
-  local COLW = 236
+  local COLW = 234
   local function sep()
     local ln = row.add{type = "line", direction = "vertical"}
     ln.style.vertically_stretchable = true
