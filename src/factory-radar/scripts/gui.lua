@@ -70,7 +70,7 @@ end
 -- рамки верхнего уровня в области прокрутки получают одну и ту же ширину. Без неё они ужимаются до ширины
 -- своего содержимого (в области прокрутки stretchable растягивает только до самого широкого элемента),
 -- и у коротких вкладок справа остаётся больше места, чем слева
-local CARD_W = W - 14
+local CARD_W = W - 10
 local function full_width(f, parent)
   if parent.type == "scroll-pane" then f.style.minimal_width = CARD_W end
 end
@@ -2726,7 +2726,7 @@ end
 local function new_pane(parent, name)
   local pane = parent.add{type = "scroll-pane", name = name, direction = "vertical"}
   pane.horizontal_scroll_policy = "never"      -- только вверх-вниз; всё переносится по ширине
-  pane.vertical_scroll_policy = "always"      -- полоса видна всегда: ширина одна и та же, пустого места справа нет
+  pane.vertical_scroll_policy = "auto"      -- полоса только там, где она нужна
   pane.style.maximal_height = 470
   pane.style.width = W + 20
   pane.style.horizontally_stretchable = true

@@ -71,6 +71,17 @@ function M.on_died(e, ent)
   end
 end
 
+-- для скриншотов (мод-помощник): записать потерянную платформу и написать об этом в чат
+function M.demo_lost(name, from, to, cause)
+  local d = S()
+  table.insert(d.plat_lost, 1, {name = name, tick = game.tick, from = from, to = to, cause = cause, trips = 3, ast = 120})
+  d.plat_lost_n = (d.plat_lost_n or #d.plat_lost - 1) + 1
+  local where = {"", C.planet_ls(from), " → ", C.planet_ls(to)}
+  local cp = prototypes.entity[cause]
+  local cause_ls = {"", helpers.is_valid_sprite_path("entity/" .. cause) and ("[img=entity/" .. cause .. "] ") or "", cp and cp.localised_name or cause}
+  C.send("platform-lost", {"tr-msg.platform-lost", C.chat_rich(name), where, cause_ls}, {platform = name, where = where}, {1, 0.6, 0.5})
+end
+
 -- всё, что нужно окну о каждой платформе
 -- одна платформа: где она, текущий прыжок (повёрнутый по ходу полёта), расписание, груз, корпус
 function M.row(pl)

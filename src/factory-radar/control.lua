@@ -104,6 +104,66 @@ remote.add_interface("factory-radar", {
   end,
 })
 
+-- условия для скриншотов: работает только если включён мод-помощник tr-shot-helper
+if script.active_mods and script.active_mods["tr-shot-helper"] then
+  local function planet_pair()
+    local list = {}
+    for name, pl in pairs(game.planets) do if not pl.prototype.hidden then list[#list + 1] = name end end
+    table.sort(list)
+    return list[1] or "nauvis", list[2] or list[1] or "nauvis"
+  end
+  remote.add_interface("factory-radar-demo", {
+    title = function(pi, id)
+      local p, t = game.get_player(pi), C.title_by_id(id or "mvp-star")
+      if not (p and t) then return false end
+      local d = C.D()
+      d.titles[p.name] = d.titles[p.name] or {}
+      d.titles[p.name][t.id] = game.tick
+      local name, reason = C.title_rich(t.id), C.title_reason(t)
+      C.send("title", {"tr-msg.title", p.name, name, reason}, {player = p.name, title = name, reason = reason}, {0.85, 0.95, 1}, p)
+      return true
+    end,
+    achievement = function(pi, id)
+      local p = game.get_player(pi)
+      local a
+      for _, x in ipairs(C.ACH) do if x.id == (id or "first-landing") then a = x end end
+      if not (p and a) then return false end
+      local d = C.D()
+      d.ach[p.name] = d.ach[p.name] or {}
+      d.ach[p.name][a.id] = game.tick
+      local why = {"tr-ach." .. a.id .. "-did"}
+      C.send("ach", {"tr-msg.ach", p.name, {"tr-ach." .. a.id}, why}, {player = p.name, achievement = {"tr-ach." .. a.id}, why = why}, {1, 0.95, 0.75}, p)
+      return true
+    end,
+    lost_platform = function()
+      local a, b = planet_pair()
+      PF.demo_lost("A.I. \"Penguin\"", a, b, "big-oxide-asteroid")
+      return true
+    end,
+    quiz = function(pi)
+      local p = game.get_player(pi)
+      local who = p and p.name or "Player"
+      local icon = helpers.is_valid_sprite_path("item/atomic-bomb") and "[img=item/atomic-bomb] " or ""
+      local qi = helpers.is_valid_sprite_path("virtual-signal/signal-question-mark") and "[img=virtual-signal/signal-question-mark] " or ""
+      local col = {1, 0.75, 0.45}
+      C.broadcast({"", qi, {"tr-roulette.start", who, 60, who .. ", TheKumi, sleekhead"}}, col)
+      C.broadcast({"tr-roulette.joined", "TheKumi", 2}, col)
+      C.broadcast({"tr-roulette.pool", who .. ", TheKumi", 2}, col)
+      C.broadcast({"tr-roulette.lost", "TheKumi"}, col)
+      C.broadcast({"tr-roulette.done", "TheKumi", icon, 0}, col)
+      return true
+    end,
+    mvp = function(pi)
+      local p = game.get_player(pi)
+      if not p then return false end
+      C.send("mvp", {"tr-msg.mvp-reminder", 10, (C.online_numbered())}, {minutes = 10}, {1, 0.85, 0.5}, nil, false)
+      if C.hooks.popup then C.hooks.popup(p, "mvp") end
+      return true
+    end,
+    shift = function() SH.close() return true end,
+  })
+end
+
 script.on_init(C.safe(setup))
 script.on_configuration_changed(C.safe(setup))
 
