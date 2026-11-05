@@ -72,7 +72,7 @@ end
 -- и у коротких вкладок справа остаётся больше места, чем слева
 -- Один стандарт для всех вкладок. Область прокрутки занимает всю ширину окна (раньше справа пропадало около 40 px),
 -- справа всегда место под полосу прокрутки (BAR), слева такой же запас, поэтому края симметричны с полосой и без неё
-local PANE_W, PAD_L, PAD_R, BAR = W + 60, 22, 8, 14
+local PANE_W, PAD_L, PAD_R, BAR = W + 53, 9, 8, 14
 local CARD_W = PANE_W - PAD_L - PAD_R - BAR - 6
 local function full_width(f, parent)
   if parent.type == "scroll-pane" then f.style.minimal_width = CARD_W end
