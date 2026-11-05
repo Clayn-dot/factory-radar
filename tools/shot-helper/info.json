@@ -1,9 +1,0 @@
-{
-  "name": "tr-shot-helper",
-  "version": "0.1.0",
-  "title": "Screenshot helper",
-  "author": "bruklynben",
-  "factorio_version": "2.0",
-  "dependencies": ["base >= 2.0.0", "factory-radar"],
-  "description": "Opens Factory Radar on a tab and takes a full-screen screenshot with the GUI. Commands: /shot [tab], /shot-all, /shot-list. Not part of Factory Radar."
-}
