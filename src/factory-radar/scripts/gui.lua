@@ -177,20 +177,27 @@ local function fill_header(p, h)
   local row = h.add{type = "flow", direction = "horizontal"}
   row.style.horizontal_spacing = 16
   -- четыре одинаковые колонки с тонкими разделителями: ровно и места не прыгают от длины текста
-  local COLW = 226
+  local COLW = 236
   local function sep()
     local ln = row.add{type = "line", direction = "vertical"}
     ln.style.vertically_stretchable = true
   end
+  -- значения каждой колонки лежат в тёмной рамке под заголовком, как карточки в сводке
+  local function boxed(col)
+    local b = deep_frame(col)
+    b.style.padding = 6
+    b.style.vertically_stretchable = true
+    return b
+  end
   local c1 = row.add{type = "flow", direction = "vertical"}
   c1.style.width = COLW
   c1.add{type = "label", caption = {"tr-gui.header-research"}, style = "caption_label", tooltip = {"tr-gui.tip-header-research"}}
-  bar(c1, rp, {"tr-gui.header-research-val", math.floor(rp * 100), rd, rt}, 90, {"tr-gui.tip-header-research"})
+  bar(boxed(c1), rp, {"tr-gui.header-research-val", math.floor(rp * 100), rd, rt}, 90, {"tr-gui.tip-header-research"})
   sep()
   local c2 = row.add{type = "flow", direction = "vertical"}
   c2.style.width = COLW
   c2.add{type = "label", caption = {"tr-gui.header-planets"}, style = "caption_label", tooltip = {"tr-gui.tip-header-planets"}}
-  bar(c2, all > 0 and done / all or 0, {"tr-gui.header-planets-val", done, all, open}, 90, {"tr-gui.tip-header-planets"})
+  bar(boxed(c2), all > 0 and done / all or 0, {"tr-gui.header-planets-val", done, all, open}, 90, {"tr-gui.tip-header-planets"})
   local cs = CB.S()
   sep()
   local c4 = row.add{type = "flow", direction = "vertical"}
@@ -206,22 +213,23 @@ local function fill_header(p, h)
   local ctip = {"", {"tr-gui.tip-header-combat"},
     top_evo and {"", "\n", {"tr-gui.header-evo", CB.pct(top_evo.now), C.planet_ls(top_evo.key)}} or ""}
   -- длинные названия планет переносятся в колонке, а не раздвигают шапку
-  wrap(c4.add{type = "label", caption = {"tr-gui.header-combat-val", C.n(total_scope and cs.total or cs.shift),
-    kp and {"tr-gui.header-kills-where", C.planet_ls(kp)} or ""}, tooltip = ctip}, COLW - 12)
+  wrap(boxed(c4).add{type = "label", caption = {"tr-gui.header-combat-val", C.n(total_scope and cs.total or cs.shift),
+    kp and {"tr-gui.header-kills-where", C.planet_ls(kp)} or ""}, tooltip = ctip}, COLW - 36)
   sep()
   local c3 = row.add{type = "flow", direction = "vertical"}
   c3.style.width = COLW
   local online = 0
   for _ in pairs(game.connected_players) do online = online + 1 end
-  c3.add{type = "label", caption = {"tr-gui.header-online", online}}
-  c3.add{type = "label", caption = {"tr-gui.header-shift", SH.minutes_left()},
+  c3.add{type = "label", caption = {"tr-gui.header-online", online}, style = "caption_label"}
+  local b3 = boxed(c3)
+  b3.add{type = "label", caption = {"tr-gui.header-shift", SH.minutes_left()},
     tooltip = {"tr-gui.tip-shift-len", string.format("%g", math.floor(C.shift_ticks() / 216000 * 10 + 0.5) / 10)}}
   -- время игры: точкой во времени и в скобках сколько всего прошло (чтобы «13 д 15:04» было понятно)
   do
     local mins = math.floor(game.tick / 3600)
     local hours = math.floor(mins / 60)
     -- как в самой игре: часы без сброса на сутки («327:04»), в скобках дни и часы
-    c3.add{type = "label", caption = {"tr-gui.header-time", string.format("%d:%02d", hours, mins % 60), {"tr.time-dh", math.floor(hours / 24), hours % 24}},
+    b3.add{type = "label", caption = {"tr-gui.header-time", string.format("%d:%02d", hours, mins % 60), {"tr.time-dh", math.floor(hours / 24), hours % 24}},
       tooltip = {"tr-gui.tip-header-time"}}
   end
 end
