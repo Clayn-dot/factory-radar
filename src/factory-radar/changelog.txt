@@ -1,0 +1,21 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 2026-11-05
+  Changes:
+    - First release for Factorio 2.1 (needs 2.1.7 or newer): the same mod as 1.0.0 for Factorio 2.0, adapted to the changes of 2.1 (recipe categories, fuel categories, the lightning damage).
+    - First release. One window for the team: who is where (jump in one click), player stats, titles and achievements, planets and their science, space platforms with route and cargo, combat and destruction, research, quality, power grids, journal, shift summaries and MVP vote.
+    - Item search over the logistic networks of planets and platforms, with the quality of the item and of the container, highlight on the map.
+    - Power grids: a planet where nothing is generated and nothing is consumed shows "no generation" instead of "enough".
+    - MVP: besides the votes the mod counts its own favourite of the shift. If nobody votes, the favourite becomes the MVP and the journal says why; if the favourite got no votes at all, the title "Unrecognized Genius".
+    - Shift summary in chat, admin reset and undo for every statistic, lightning strike on a friend, a fun quiz, titles in chat next to the name.
+    - Works with the base game, with Space Age and without, with Quality and without, with modded planets and enemies. Russian and English.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2026-11-05
+  Changes:
+    - First release. One window for the team: who is where (jump in one click), player stats, titles and achievements, planets and their science, space platforms with route and cargo, combat and destruction, research, quality, power grids, journal, shift summaries and MVP vote.
+    - Item search over the logistic networks of planets and platforms, with the quality of the item and of the container, highlight on the map.
+    - Power grids: a planet where nothing is generated and nothing is consumed shows "no generation" instead of "enough".
+    - MVP: besides the votes the mod counts its own favourite of the shift. If nobody votes, the favourite becomes the MVP and the journal says why; if the favourite got no votes at all, the title "Unrecognized Genius".
+    - Shift summary in chat, admin reset and undo for every statistic, lightning strike on a friend, a fun quiz, titles in chat next to the name.
+    - Works with the base game, with Space Age and without, with Quality and without, with modded planets and enemies. Russian and English.
