@@ -93,6 +93,17 @@ local function setup()
   for _, p in pairs(game.connected_players) do greet(p) end
 end
 
+-- для внешних инструментов (мод для скриншотов): открыть окно на нужной вкладке
+remote.add_interface("factory-radar", {
+  open_tab = function(player_index, tab)
+    local p = game.get_player(player_index)
+    if not (p and p.valid) then return false end
+    if not p.gui.screen["tr_frame"] then G.toggle(p) end
+    if tab then G.go_to(p, tab) end
+    return true
+  end,
+})
+
 script.on_init(C.safe(setup))
 script.on_configuration_changed(C.safe(setup))
 

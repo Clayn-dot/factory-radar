@@ -67,10 +67,18 @@ local function heading(parent, caption)
   l.style.bottom_margin = 4
   return l
 end
+-- рамки верхнего уровня в области прокрутки получают одну и ту же ширину. Без неё они ужимаются до ширины
+-- своего содержимого (в области прокрутки stretchable растягивает только до самого широкого элемента),
+-- и у коротких вкладок справа остаётся больше места, чем слева
+local CARD_W = W - 14
+local function full_width(f, parent)
+  if parent.type == "scroll-pane" then f.style.minimal_width = CARD_W end
+end
 -- карточка с заголовком (светлее) и тёмная рамка под данные
 local function card_frame(parent, title, tip)
   local f = parent.add{type = "frame", direction = "vertical", style = "inside_shallow_frame_with_padding"}
   f.style.horizontally_stretchable = true
+  full_width(f, parent)
   f.style.top_margin = 2
   f.style.bottom_margin = 8
   if title then
@@ -83,6 +91,7 @@ end
 local function deep_frame(parent)
   local f = parent.add{type = "frame", direction = "vertical", style = "inside_deep_frame"}
   f.style.horizontally_stretchable = true
+  full_width(f, parent)
   f.style.padding = 10
   return f
 end
@@ -2717,7 +2726,7 @@ end
 local function new_pane(parent, name)
   local pane = parent.add{type = "scroll-pane", name = name, direction = "vertical"}
   pane.horizontal_scroll_policy = "never"      -- только вверх-вниз; всё переносится по ширине
-  pane.vertical_scroll_policy = "auto"      -- без пустого места под полосу прокрутки, рамки по краям симметричны
+  pane.vertical_scroll_policy = "always"      -- полоса видна всегда: ширина одна и та же, пустого места справа нет
   pane.style.maximal_height = 470
   pane.style.width = W + 20
   pane.style.horizontally_stretchable = true

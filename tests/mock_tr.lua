@@ -36,7 +36,7 @@ local SD={["tr-s-shift-hours"]=4,["tr-s-afk-minutes"]=10,["tr-s-death-limit"]=3,
 settings.startup = setmetatable({}, {__index=function(t,k) local v=SD[k] if v==nil then v=true end return {value=v} end})
 script_active={}
 helpers = {is_valid_sprite_path=function(s) return s=='utility/electricity_icon' end, evaluate_expression=function(f, v) return 1000*(v.L-2) end}
-remote = {interfaces={}}
+remote = {interfaces={}, add_interface=function() end, call=function() return false end}
 _G.drawn=0 _G.destroyed=0 _G.texts={}
 rendering = {clear=function() end, draw_text=function(t) local o={valid=true,text=t.text,target=t.target,color=t.color} function o.destroy() o.valid=false _G.destroyed=_G.destroyed+1 end _G.drawn=_G.drawn+1 table.insert(_G.texts,t.text) return o end}
 local function newel(spec, parent)
