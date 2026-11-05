@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 2026-11-06
+  Changes:
+    - Window: the frames of Who's where, Players, Records, Destruction and Journal now have the same space on the left and on the right.
+    - Window: the planet cards fill the whole width.
+    - Summary: Combat and Destruction of the shift are one block with a single divider.
+    - FAQ: the answer about what counts as "Built" is corrected (robot building is counted only when the game knows whose ghost it was).
+---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2026-11-05
   Changes:
@@ -9,6 +17,14 @@ Date: 2026-11-05
     - MVP: besides the votes the mod counts its own favourite of the shift. If nobody votes, the favourite becomes the MVP and the journal says why; if the favourite got no votes at all, the title "Unrecognized Genius".
     - Shift summary in chat, admin reset and undo for every statistic, lightning strike on a friend, a fun quiz, titles in chat next to the name.
     - Works with the base game, with Space Age and without, with Quality and without, with modded planets and enemies. Russian and English.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 2026-11-06
+  Changes:
+    - Window: the frames of Who's where, Players, Records, Destruction and Journal now have the same space on the left and on the right.
+    - Window: the planet cards fill the whole width.
+    - Summary: Combat and Destruction of the shift are one block with a single divider.
+    - FAQ: the answer about what counts as "Built" is corrected (robot building is counted only when the game knows whose ghost it was).
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2026-11-05

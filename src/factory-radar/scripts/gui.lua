@@ -370,18 +370,26 @@ local function fill_summary(p, pane)
     end
   end
 
-  -- бой и разрушения рядом
-  local duo = pane.add{type = "flow", direction = "horizontal"}
-  duo.style.horizontal_spacing = 6
+  -- бой и разрушения: одна общая карточка, между половинами одна линия
+  local dcard = card_frame(pane)
+  local duo = dcard.add{type = "flow", direction = "horizontal"}
+  duo.style.horizontal_spacing = 10
   duo.style.horizontally_stretchable = true
   local cs = CB.S()
   local kills = sc == "total" and cs.total or cs.shift
-  -- две одинаковые карточки, в каждой одна строка
-  local half = math.floor(W / 2) - 8
+  -- две одинаковые половины, в каждой одна строка
+  local first_half = true
   local function duo_card(title)
-    local f = card_frame(duo, title)
-    f.style.horizontally_stretchable = false
-    f.style.width = half
+    if not first_half then
+      local ln = duo.add{type = "line", direction = "vertical"}
+      ln.style.vertically_stretchable = true
+    end
+    first_half = false
+    local f = duo.add{type = "flow", direction = "vertical"}
+    f.style.horizontally_stretchable = true
+    f.style.minimal_width = 380
+    local l = f.add{type = "label", caption = title, style = "caption_label"}
+    l.style.bottom_margin = 6
     local box = deep_frame(f)
     box.style.padding = 8
     return box
@@ -749,7 +757,7 @@ local function fill_planets(p, pane)
     icon.style.stretch_image_to_widget_size = true
     local col = card.add{type = "flow", direction = "vertical"}
     col.style.left_margin = 8
-    col.style.maximal_width = W - 150      -- не шире окна
+    col.style.horizontally_stretchable = true      -- карточка планеты на всю ширину
     local status
     if st.mastered then status = {"tr-gui.planet-mastered", st.by or {"tr-gui.before-install"}}
     elseif r.s then status = {"tr-gui.planet-in-progress"}
@@ -2709,7 +2717,7 @@ end
 local function new_pane(parent, name)
   local pane = parent.add{type = "scroll-pane", name = name, direction = "vertical"}
   pane.horizontal_scroll_policy = "never"      -- только вверх-вниз; всё переносится по ширине
-  pane.vertical_scroll_policy = "auto-and-reserve-space"
+  pane.vertical_scroll_policy = "auto"      -- без пустого места под полосу прокрутки, рамки по краям симметричны
   pane.style.maximal_height = 470
   pane.style.width = W + 20
   pane.style.horizontally_stretchable = true
