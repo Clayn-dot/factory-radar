@@ -12,6 +12,8 @@ Press the radar button (or `Ctrl+Shift+R`) and it is all there. No setup, no new
 
 ![The Summary tab](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-01-summary.png)
 
+*The Summary tab: the leaders of the shift and what every planet produced.*
+
 - **Know your factory**: space platforms, item search, power grids, planets, research.
 - **Play with friends**: who is where, titles next to your name, achievements, shift summaries, a few fun toys.
 - **Works with your setup**: modded planets and enemies, English and Russian, light on UPS.
@@ -26,11 +28,16 @@ Press the radar button (or `Ctrl+Shift+R`) and it is all there. No setup, no new
 - A record of the last flights of every platform.
 - Cargo sorted by category, so you see at once what a platform really carries.
 - Asteroids broken on the way, platforms that stand still or wait for a starter pack.
-- When a platform is destroyed it goes to its own list with the route it was on and the probable cause.
 
-![A platform with its route, flights and cargo](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-02-platform-route.png)
+![A platform card](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-02-platform-route.png)
 
-![The list of lost platforms](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-04-lost-platforms.png)
+*A platform card: the route with the progress of the current leg, the last flight and the cargo by category.*
+
+When a platform is destroyed it goes to its own list with the route it was on and the probable cause.
+
+![Destroyed platforms](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-04-lost-platforms.png)
+
+*Destroyed platforms: where they were, what hit them, how many flights and broken asteroids they had.*
 
 ## Find any item
 
@@ -42,7 +49,9 @@ Lost a stack of something? Press **Find item**.
 4. Click a place: the camera flies there and the containers with the item are highlighted on the map. Each row shows the container with its quality and how many items are inside. Hover a row to see the coordinates.
 5. The window can be collapsed to a small bar and kept on the screen.
 
-![The search window and the containers it highlights on the map](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-05-find-item.png)
+![Item search](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-05-find-item.png)
+
+*Item search: the places on the left, the containers it highlights on the map on the right.*
 
 ## Power grids
 
@@ -51,12 +60,16 @@ Every planet with a network gets a status: enough, on the edge or out of power. 
 - Machines that really lack power are written to the journal in red, after a short while so a blink does not count.
 - Warnings in yellow: no fuel or steam, fuel running out, accumulators that will not last until dawn (the length of the night is taken from the planet), a fast drain, demand that keeps growing.
 - The capacity of the sources takes the quality of the buildings and the sun of the planet or of the place in space into account.
-- Space platforms have their own block: the charge, the load and the same red and yellow states.
-- One journal for planets and platforms keeps the exact game time, how long it lasted and the probable causes.
 
 ![Power statuses of planets and platforms](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-07-power-grids.png)
 
-![The journal with the causes](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-08-power-reason-and-log.png)
+*Power grids: every planet and every platform with its load and the charge of its accumulators.*
+
+Space platforms have their own block: the charge, the load and the same red and yellow states. One journal for planets and platforms keeps the exact game time, how long it lasted and the probable causes.
+
+![The power journal](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-08-power-reason-and-log.png)
+
+*The journal: when it started, how long it lasted, how many machines worked below full power and the probable cause.*
 
 ## Planets, research, combat
 
@@ -66,7 +79,7 @@ Every planet with a network gets a status: enough, on the edge or out of power. 
 
 ![The Planets tab](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-09-planets.png)
 
-![Science milestones in chat](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-17-science-milestones-chat.png)
+*The Planets tab: what is mastered, the native science of each planet and the packs made there.*
 
 ---
 
@@ -78,7 +91,13 @@ Every player: the planet, what they are doing, where they look. One click flies 
 
 ![Who is where](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-10-whos-where.png)
 
+*Who is where: every player, their planet, what they are doing and where they look.*
+
+Click a name and you get the card of the player.
+
 ![A player card](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-11-player-card.png)
+
+*A player card: the stats, the favourite planet, what they killed with and the next titles.*
 
 ## Titles and achievements
 
@@ -88,21 +107,27 @@ Every player: the planet, what they are doing, where they look. One click flies 
 
 ![The Titles tab](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-12-titles.png)
 
-![Achievements in chat](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-13-achievements-chat.png)
+*The Titles tab: the titles you earned and the one that shows in chat.*
+
+When you earn something, the chat tells everybody (you can switch these messages off for yourself).
+
+![Chat messages](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-13-achievements-chat.png)
+
+*In chat: a new title, a personal achievement and the achievements of the whole team.*
 
 ## Shifts and MVP
 
 - At the end of every shift a summary appears in chat: leaders, destruction, research, planets, power problems.
 - Players vote for the MVP, the vote is secret. If nobody votes, the mod picks the MVP itself by the share in kills, buildings, mining and distance, and the journal says why.
 
-![Shift summary and the MVP vote](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-14-shift-summary.png)
+![The shift summary](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-14-shift-summary.png)
+
+*The shift summary in chat: the top builder, combat, the MVP and the planets of the shift.*
 
 ## Fun stuff
 
 - **Lightning**: strike a friend with a lightning bolt. It never kills, it only takes part of the health. Several players can strike the same target.
 - **Quiz**: anybody can start it, those who agree take part, fate picks one of them and a surprise awaits that player. One quiz at a time, with a cooldown.
-
-![Lightning in chat](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-15-lightning-chat.png)
 
 ---
 
@@ -115,6 +140,8 @@ Every player: the planet, what they are doing, where they look. One click flies 
 - **Settings**: an admin can switch every feature on or off and reset or undo any statistic, one section at a time. Players hide the tabs and chat messages they do not need, each for themselves.
 
 ![The Settings tab](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-16-settings.png)
+
+*Settings: every player hides the tabs and the messages they do not need.*
 
 ## Commands
 
