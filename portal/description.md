@@ -42,9 +42,7 @@ Lost a stack of something? Press **Find item**.
 4. Click a place: the camera flies there and the containers with the item are highlighted on the map. Each row shows the container with its quality and how many items are inside. Hover a row to see the coordinates.
 5. The window can be collapsed to a small bar and kept on the screen.
 
-![The search window](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-05-find-item-window.png)
-
-![Containers highlighted on the map](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-06-find-item-map.png)
+![The search window and the containers it highlights on the map](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-05-find-item.png)
 
 ## Power grids
 
