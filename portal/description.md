@@ -120,20 +120,20 @@ Every player: the planet, what they are doing, where they look. One click flies 
 
 Everything is also in the window, the commands are for quick use from chat.
 
-| Command | What it does |
-| --- | --- |
-| `/tr-now` | Right now: shift leaders, planets, time to the summary |
-| `/tr-top [shift]` | Team stats, all time or for the shift |
-| `/tr-me [name]` | A player card |
-| `/tr-vs name` | Compare yourself with a player |
-| `/tr-where [name]` | Who is where and where they look |
-| `/tr-planets`, `/tr-research`, `/tr-combat`, `/tr-log` | Short reports in chat |
-| `/tr-mvp name` | Vote for the MVP of the shift |
-| `/tr-zap name` | Strike a player with lightning |
-| `/tr-roulette`, `/tr-in` | Start the quiz, agree to take part |
-| `/tr-shift-now` (admin) | Sum up the shift right now |
-| `/tr-census` (admin) | Recount who built what on the planets |
-| `/tr-zap-lift number` (admin) | Fix the height of the lightning |
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/tr-now` | everyone | Right now: who is online, the shift leaders, the planets and the time left to the shift summary |
+| `/tr-top [shift]` | everyone | Team leaderboard: all time, or for the current shift with the word shift |
+| `/tr-me [name]` | everyone | Your player card: stats and the next titles; with a name, the card of that player |
+| `/tr-vs name` | everyone | Compare yourself with another player, number by number |
+| `/tr-where [name]` | everyone | Who is where and where they look; with a name, only that player |
+| `/tr-planets`, `/tr-research`, `/tr-combat`, `/tr-log` | everyone | Short reports in chat: planets, research, combat, the journal |
+| `/tr-mvp name` | everyone | Vote for the MVP of the shift (the vote is secret) |
+| `/tr-zap name` | everyone | Strike a player with lightning (never kills, has a cooldown) |
+| `/tr-roulette`, `/tr-in` | everyone | Start the quiz, agree to take part |
+| `/tr-shift-now` | admin | Sum up the shift right now |
+| `/tr-census` | admin | Recount who built what on the planets |
+| `/tr-zap-lift number` | admin | Fix the height of the lightning |
 
 ## Versions
 
