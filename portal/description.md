@@ -109,11 +109,11 @@ Click a name and you get the card of the player.
 
 *The Titles tab: the titles you earned and the one that shows in chat.*
 
-When you earn something, the chat tells everybody (you can switch these messages off for yourself).
+A new title is announced in chat to everybody, a personal achievement only to the player who got it, a team achievement to the whole team. Every player can switch these messages off for themselves.
 
 ![Chat messages](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-13-achievements-chat.png)
 
-*In chat: a new title, a personal achievement and the achievements of the whole team.*
+*In chat (as the player who got them sees it): a new title, a personal achievement and the achievements of the whole team.*
 
 ## Shifts and MVP
 
