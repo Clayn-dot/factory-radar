@@ -370,7 +370,7 @@ function M.fill_help(p, pane)
   cmd_table(b, rows)
 
   local f = section(pane, {"tr-help.faq"})
-  for _, i in ipairs({1, 2, 3, 4, 6, 7, 8, 9}) do wrap(f.add{type = "label", caption = {"tr-help.faq-" .. i}}) end
+  for _, i in ipairs({1, 2, 3, 4, 6, 7, 8, 9, 10}) do wrap(f.add{type = "label", caption = {"tr-help.faq-" .. i}}) end
 end
 
 ---------------------------------------------------------------- события
@@ -455,6 +455,7 @@ function M.on_checked(p, el, gs)
   if tag == "cfg" then
     C.set(el.tags.key, el.state)
     if el.tags.key == "tr-chat-titles" then TG.apply_all() end
+    if el.tags.key == "tr-space-gate" and C.hooks.space_unlocked then C.hooks.space_unlocked() end
     return false
   elseif tag == "cfg_planet_titles" then
     cfg.planet_titles_off = (not el.state) or nil

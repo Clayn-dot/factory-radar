@@ -11,6 +11,7 @@ C.CFG = {
   {key = "tr-death-tags", group = "features", default = true},
   {key = "tr-afk", group = "features", default = true},
   {key = "tr-zap", group = "features", default = true},
+  {key = "tr-space-gate", group = "features", default = true},
   -- что считаем
   {key = "tr-track-robots", group = "tracking", default = true},
   {key = "tr-track-robot-mined", group = "tracking", default = true},
@@ -311,6 +312,27 @@ function C.clock_s(tick)
   local hhmmss = string.format("%02d:%02d:%02d", h % 24, math.floor(sec / 60) % 60, sec % 60)
   if h < 24 then return hhmmss end
   return {"tr.clock-days", math.floor(h / 24), hhmmss}
+end
+
+-- космос открыт? Вкладки «Планеты» и «Платформы» и всё про планеты на «Сводке» показываются, когда исследована ракетная шахта или
+-- космическая платформа. Если в игре таких технологий нет (или админ выключил ограничение), открыто всегда
+local SPACE_TECHS = {"rocket-silo", "space-platform"}
+function C.space_techs() return SPACE_TECHS end
+function C.space_unlocked()
+  if not C.S("tr-space-gate") then return true end
+  local ok, res = pcall(function()
+    local f = game.forces.player
+    local seen = false
+    for _, name in ipairs(SPACE_TECHS) do
+      local t = f.technologies[name]
+      if t then
+        seen = true
+        if t.researched then return true end
+      end
+    end
+    return not seen
+  end)
+  return (not ok) or res
 end
 
 function C.gps(pos, surface)

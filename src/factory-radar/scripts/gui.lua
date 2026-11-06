@@ -207,7 +207,11 @@ local function fill_header(p, h)
   local c2 = row.add{type = "flow", direction = "vertical"}
   c2.style.width = COLW
   c2.add{type = "label", caption = {"tr-gui.header-planets"}, style = "caption_label", tooltip = {"tr-gui.tip-header-planets"}}
-  bar(boxed(c2), all > 0 and done / all or 0, {"tr-gui.header-planets-val", done, all, open}, 90, {"tr-gui.tip-header-planets"})
+  if C.space_unlocked() then
+    bar(boxed(c2), all > 0 and done / all or 0, {"tr-gui.header-planets-val", done, all, open}, 90, {"tr-gui.tip-header-planets"})
+  else
+    muted(boxed(c2), {"tr-gui.header-locked"}).tooltip = {"tr-gui.space-locked"}
+  end
   local cs = CB.S()
   sep()
   local c4 = row.add{type = "flow", direction = "vertical"}
@@ -369,7 +373,11 @@ local function fill_summary(p, pane)
   end
   if not any then muted(lead, {sk(p, "tr-gui.why-no-leaders")}) end
 
-  -- планеты: выпуск за смену
+  -- планеты: выпуск за смену (пока космос закрыт исследованием, вместо карточки строка с подсказкой)
+  local space_open = C.space_unlocked()
+  if not space_open then muted(pane, {"tr-gui.space-locked"}).style.bottom_margin = 6 end
+  repeat
+  if not space_open then break end
   local pcard = card_frame(pane, {sk(p, "tr-gui.sum-planets")}, {"tr-gui.tip-output"})
   local pbox = deep_frame(pcard)
   -- планеты без выпуска не показываем
@@ -416,6 +424,7 @@ local function fill_summary(p, pane)
       ptab.add{type = "empty-widget"}
     end
   end
+  until true
 
   -- бой и разрушения: одна общая карточка, между половинами одна линия
   local dcard = card_frame(pane)
@@ -2166,9 +2175,12 @@ local ALWAYS = {settings = true, help = true}
 -- группы и подвкладки, которые игрок хочет видеть
 local function layout(p)
   local out = {}
+  local space = C.space_unlocked()
   for _, g in ipairs(GROUPS) do
     local subs = {}
-    for _, s in ipairs(g.subs) do if ALWAYS[s[1]] or C.P(p, "tab-" .. s[1]) then subs[#subs + 1] = s end end
+    for _, s in ipairs(g.subs) do
+      if (g.id ~= "space" or space) and (ALWAYS[s[1]] or C.P(p, "tab-" .. s[1])) then subs[#subs + 1] = s end
+    end
     if #subs > 0 then out[#out + 1] = {id = g.id, icon = g.icon, subs = subs} end
   end
   return out
@@ -3159,6 +3171,17 @@ function M.on_closed(e)
   local el = e.element
   if el and el.valid and el.name == FRAME then M.close(game.get_player(e.player_index)) end
 end
+
+-- космос открылся (или админ включил/выключил ограничение): окна пересобираются с новыми вкладками
+function M.on_unlock()
+  for _, p in pairs(game.connected_players) do
+    if p.gui.screen[FRAME] then
+      M.close(p)
+      M.toggle(p)
+    end
+  end
+end
+C.hooks.space_unlocked = function() M.on_unlock() end
 
 function M.close(p)
   if p.gui.screen[FLT] then p.gui.screen[FLT].destroy() end

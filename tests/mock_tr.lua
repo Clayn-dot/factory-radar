@@ -690,3 +690,23 @@ handlers.on_gui_click({player_index=1, element=findtag(fr, "close") or {valid=tr
 print("frame after close:", p1.gui.screen.tr_frame and "still" or "closed")
 local m = {} for k in pairs(_G.MISSING) do m[#m+1]=k end table.sort(m)
 print("MISSING KEYS:", #m, table.concat(m, ", "))
+-- space tabs open with the research of the rocket silo or the space platform
+print("--- space gate ---")
+do
+  local C0 = require("scripts.core")
+  local G0 = require("scripts.gui")
+  local function has_space() local fr = p1.gui.screen.tr_frame; return fr and fr.tr_tabs and fr.tr_tabs["tr_grp_space"] ~= nil end
+  force.technologies = {["rocket-silo"] = {researched = false}, ["space-platform"] = {researched = false}}
+  print("locked:", C0.space_unlocked() and "WRONG" or "ok")
+  if not p1.gui.screen.tr_frame then G0.toggle(p1) end
+  C0.hooks.space_unlocked()
+  print("space tab hidden while locked:", has_space() and "WRONG" or "ok")
+  handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="goto", sub="summary"}}})
+  pcall(require("scripts.research").on_research_finished, {research = {valid = true, name = "space-platform", localised_name = {"x"}, force = {name = "player"}}})
+  force.technologies["space-platform"].researched = true
+  C0.hooks.space_unlocked()
+  print("unlocked by the research:", C0.space_unlocked() and "ok" or "WRONG")
+  print("space tab shown after the research:", has_space() and "ok" or "WRONG")
+  force.technologies = nil
+  print("no such technologies: open:", C0.space_unlocked() and "ok" or "WRONG")
+end

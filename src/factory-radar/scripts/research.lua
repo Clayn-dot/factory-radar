@@ -95,6 +95,13 @@ function M.on_research_started() end
 function M.on_research_finished(e)
   local tech = e.research
   if not (tech and tech.valid) or tech.force.name ~= "player" then return end
+  -- ракетная шахта или космическая платформа: открываются вкладки про космос
+  for _, name in ipairs(C.space_techs()) do
+    if tech.name == name and C.hooks.space_unlocked then
+      C.broadcast({"tr-msg.space-unlocked", tech.localised_name}, {0.75, 0.9, 1})
+      C.hooks.space_unlocked()
+    end
+  end
   local r = R()
   r.cur = nil
   if is_infinite(tech) then
