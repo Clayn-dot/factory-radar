@@ -4,6 +4,8 @@ data:extend({
    size = 64, flags = {"gui-icon"}, mipmap_count = 1},
   {type = "sprite", name = "tr-map-frame", filename = "__factory-radar__/graphics/map-frame-32.png",
    size = 32, flags = {"gui-icon"}, mipmap_count = 2},
+  {type = "sprite", name = "tr-win-min-d", filename = "__factory-radar__/graphics/win-min-d-32.png", size = 32, flags = {"gui-icon"}, mipmap_count = 1},
+  {type = "sprite", name = "tr-win-max-d", filename = "__factory-radar__/graphics/win-max-d-32.png", size = 32, flags = {"gui-icon"}, mipmap_count = 1},
   {type = "custom-input", name = "tr-toggle", key_sequence = "CONTROL + SHIFT + R", consuming = "none", action = "lua"},
 })
 if settings.startup["tr-s-shortcut"].value then

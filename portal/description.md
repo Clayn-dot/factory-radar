@@ -6,7 +6,7 @@ The mod is free. If you like it, you can say thanks with a one-time donation on 
 
 # Factory Radar
 
-**Your whole factory in one window.** See where your space platforms are and what they carry, where the power fails and why, find any item across all your logistic networks in one click, and see who is where and what they are doing.
+**Your whole factory in one window.** See where your space platforms are and what they carry, where the power fails and why, find any item on planets, platforms and with players in one click, and see who is where and what they are doing.
 
 Press the radar button (or `Ctrl+Shift+R`) and it is all there. No setup, no new items, nothing changes in your world. It is just as useful in a solo game as it is with friends.
 
@@ -28,9 +28,7 @@ Press the radar button (or `Ctrl+Shift+R`) and it is all there. No setup, no new
 - Asteroids broken on the way, platforms that stand still or wait for a starter pack.
 - When a platform is destroyed it goes to its own list with the route it was on and the probable cause.
 
-![A platform with its route](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-02-platform-route.png)
-
-![Cargo and the last flights](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-03-platform-cargo.png)
+![A platform with its route, flights and cargo](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-02-platform-route.png)
 
 ![The list of lost platforms](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-04-lost-platforms.png)
 
@@ -39,9 +37,10 @@ Press the radar button (or `Ctrl+Shift+R`) and it is all there. No setup, no new
 Lost a stack of something? Press **Find item**.
 
 1. Pick an item. Choose its quality too.
-2. You get every logistic network of every planet and platform that holds it, with totals.
-3. Click a place: the camera flies there and the containers with the item are highlighted on the map. Each row shows the container with its quality, how many items are inside and who holds them.
-4. Items in a player's inventory are listed with the player's name. A switch also looks into ordinary chests outside the networks.
+2. You get every planet and platform that holds it, the most first, with the total.
+3. Four boxes pick where to look: logistic networks, what players carry, chests outside the networks and inside machines (the last two take longer, so they are off at first).
+4. Click a place: the camera flies there and the containers with the item are highlighted on the map. Each row shows the container with its quality and how many items are inside. Hover a row to see the coordinates.
+5. The window can be collapsed to a small bar and kept on the screen.
 
 ![The search window](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-05-find-item-window.png)
 
@@ -49,26 +48,27 @@ Lost a stack of something? Press **Find item**.
 
 ## Power grids
 
-Every planet with a network gets a status: enough, on the edge or out of power. Hover over it to see the probable reason.
+Every planet with a network gets a status: enough, on the edge or out of power. Hover over it to see the probable reason and the trend of the consumption.
 
-- Demand jumped, and which machine grew the most.
-- A source dropped, and which one.
-- Accumulators are empty, or full but not connected to the network.
-- No storage on the planet at all.
-- A planet where nothing is generated says so instead of a calm "enough".
-- A log keeps the last events, so you can see what happened while you were away.
+- Machines that really lack power are written to the journal in red, after a short while so a blink does not count.
+- Warnings in yellow: no fuel or steam, fuel running out, accumulators that will not last until dawn (the length of the night is taken from the planet), a fast drain, demand that keeps growing.
+- The capacity of the sources takes the quality of the buildings and the sun of the planet or of the place in space into account.
+- Space platforms have their own block: the charge, the load and the same red and yellow states.
+- One journal for planets and platforms keeps the exact game time, how long it lasted and the probable causes.
 
-![Power statuses](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-07-power-grids.png)
+![Power statuses of planets and platforms](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-07-power-grids.png)
 
-![The reason and the log](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-08-power-reason-and-log.png)
+![The journal with the causes](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-08-power-reason-and-log.png)
 
 ## Planets, research, combat
 
 - **Planets**: which ones you have mastered and what each one still needs. The "native" science of every planet is found by the mod (an admin can fix it for modded planets). Output per shift, the pace against the last shift, who built the most on each planet.
-- **Research and quality**: progress, infinite levels, milestones (the 1st, 1 000th, 10 000th pack), science really made and spent per minute, and what you got above normal quality.
+- **Research and quality**: progress, infinite levels, milestones (the 1st, 1 000th, 10 000th, 100 000th, millionth and billionth pack), science really made and spent per minute, and what you got above normal quality.
 - **Combat**: what you kill and what kills you, per planet and per weapon. The evolution of every enemy faction with history by shifts. What the enemies destroyed.
 
 ![The Planets tab](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-09-planets.png)
+
+![Science milestones in chat](https://raw.githubusercontent.com/Clayn-dot/factory-radar/main/portal/images/IMG-17-science-milestones-chat.png)
 
 ---
 

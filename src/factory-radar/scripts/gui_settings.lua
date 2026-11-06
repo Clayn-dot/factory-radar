@@ -83,6 +83,7 @@ function M.fill_settings(p, pane, gs)
   check(me, {"tr-cfg.p-greet"}, C.P(p, "greet"), {tr = "pcfg", key = "greet"}, {"tr-cfg.p-greet-tip"})
   check(me, {"tr-cfg.p-intro"}, C.P(p, "intro"), {tr = "pcfg", key = "intro"}, {"tr-cfg.p-intro-tip"})
   check(me, {"tr-cfg.p-know"}, C.P(p, "know"), {tr = "pcfg", key = "know"}, {"tr-cfg.p-know-tip"})
+  check(me, {"tr-cfg.p-tips"}, C.P(p, "tips"), {tr = "pcfg", key = "tips"}, {"tr-cfg.p-tips-tip"})
   heading(me, {"tr-cfg.p-window-head"})
   local ar = setting_row(me, {"tr-cfg.p-autorefresh"}, {"tr-cfg.p-autorefresh-tip"})
   local cur = C.P(p, "autorefresh") or 0
@@ -136,7 +137,7 @@ function M.fill_settings(p, pane, gs)
   -- сообщения в чат
   heading(sv, {"tr-cfg.messages"})
   muted(sv, {"tr-cfg.messages-hint"})
-  local t = sv.add{type = "table", column_count = 4, draw_horizontal_line_after_headers = true}
+  local t = sv.add{type = "table", column_count = 4}
   t.style.horizontal_spacing = 10
   t.style.vertical_spacing = 4
   for _, h in ipairs({"col-msg", "col-aud", "col-tpl", "col-reset"}) do t.add{type = "label", caption = {"tr-cfg." .. h}, style = "caption_label"} end
@@ -278,7 +279,7 @@ function M.title_editor(p, parent, gs, admin)
   cfg.titles_custom = cfg.titles_custom or {}
   muted(parent, {"tr-cfg.titles-hint"})
   check(parent, {"tr-cfg.planet-titles"}, not cfg.planet_titles_off, {tr = "cfg_planet_titles"}, {"tr-cfg.planet-titles-tip"}, admin)
-  local t = parent.add{type = "table", column_count = 5, draw_horizontal_line_after_headers = true}
+  local t = parent.add{type = "table", column_count = 5}
   t.style.horizontal_spacing = 10
   for _, h in ipairs({"col-on", "col-title", "col-rename", "col-stat", "col-n"}) do
     t.add{type = "label", caption = {"tr-cfg." .. h}, style = "caption_label"}
@@ -344,7 +345,7 @@ local CMDS = {
 }
 
 local function cmd_table(parent, rows)
-  local t = parent.add{type = "table", column_count = 3, draw_horizontal_line_after_headers = true}
+  local t = parent.add{type = "table", column_count = 3}
   t.style.horizontal_spacing = 14
   t.style.vertical_spacing = 4
   for _, h in ipairs({"col-cmd", "col-who", "col-what"}) do t.add{type = "label", caption = {"tr-help." .. h}, style = "caption_label"} end
@@ -360,7 +361,7 @@ end
 function M.fill_help(p, pane)
   pane.clear()
   local a = section(pane, {"tr-help.how"})
-  for i = 1, 5 do wrap(a.add{type = "label", caption = {"tr-help.how-" .. i}}) end
+  for i = 1, 6 do wrap(a.add{type = "label", caption = {"tr-help.how-" .. i}}) end
 
   local b = section(pane, {"tr-help.commands"})
   muted(b, {"tr-help.commands-hint"})
@@ -369,7 +370,7 @@ function M.fill_help(p, pane)
   cmd_table(b, rows)
 
   local f = section(pane, {"tr-help.faq"})
-  for _, i in ipairs({1, 2, 3, 4, 6, 7}) do wrap(f.add{type = "label", caption = {"tr-help.faq-" .. i}}) end
+  for _, i in ipairs({1, 2, 3, 4, 6, 7, 8, 9}) do wrap(f.add{type = "label", caption = {"tr-help.faq-" .. i}}) end
 end
 
 ---------------------------------------------------------------- события

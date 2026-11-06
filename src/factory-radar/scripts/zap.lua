@@ -25,8 +25,6 @@ function M.blocked(from, to)
   return nil
 end
 
-function M.seconds_left(p) local v = (Z().cd[p.index] or 0) - game.tick; return v > 0 and math.ceil(v / 60) or 0 end
-
 -- Молния — линия с неба вниз: создаётся сверху, поэтому чтобы попасть в персонажа, её надо создавать на
 -- несколько клеток выше. Сколько — ставит админ: /tr-zap-lift N (клеток, по умолчанию 25), /tr-zap-lift N T ещё
 -- задаёт, на сколько тиков вперёд вести движущуюся цель (по умолчанию 12)

@@ -28,6 +28,7 @@ C.PCFG = {
   {key = "greet", default = true},
   {key = "intro", default = true},
   {key = "know", default = true},
+  {key = "tips", default = true},
   {key = "autorefresh", default = 15},
   {key = "open-tab", default = "last"},
   {key = "msg-titles", default = true, group = "msg"},
@@ -238,7 +239,8 @@ end
 -- сообщения с жирным основным текстом в чате; журнал показывает копию («ключ-j») обычного размера
 local J_ALT = {["tr-msg.ach"] = true, ["tr-msg.first-landing"] = true, ["tr-msg.mastered"] = true,
   ["tr-msg.mastered-short"] = true, ["tr-msg.platform-lost"] = true, ["tr-msg.power-low"] = true,
-  ["tr-msg.power-none"] = true, ["tr-msg.science-first"] = true, ["tr-msg.science-milestone"] = true,
+  ["tr-msg.power-none"] = true, ["tr-msg.power-plat-none"] = true, ["tr-msg.power-plat-low"] = true,
+  ["tr-msg.power-plat-empty"] = true, ["tr-msg.science-first"] = true, ["tr-msg.science-milestone"] = true,
   ["tr-msg.shift-mvp"] = true, ["tr-msg.shift-mvp-tie"] = true, ["tr-msg.team"] = true, ["tr-msg.title"] = true}
 -- текст записи журнала как он показывается: копия обычного размера для сообщений, жирных в чате
 -- (работает и для старых записей)
@@ -300,6 +302,15 @@ function C.clock(tick)
   local hhmm = string.format("%02d:%02d", h % 24, m % 60)
   if h < 24 then return hhmm end
   return {"tr.clock-days", math.floor(h / 24), hhmm}
+end
+
+-- то же с секундами: «14:32:07»
+function C.clock_s(tick)
+  local sec = math.floor(tick / 60)
+  local h = math.floor(sec / 3600)
+  local hhmmss = string.format("%02d:%02d:%02d", h % 24, math.floor(sec / 60) % 60, sec % 60)
+  if h < 24 then return hhmmss end
+  return {"tr.clock-days", math.floor(h / 24), hhmmss}
 end
 
 function C.gps(pos, surface)

@@ -74,8 +74,18 @@ end
 -- справа всегда место под полосу прокрутки (BAR), слева такой же запас, поэтому края симметричны с полосой и без неё
 local PANE_W, PAD_L, PAD_R, BAR = W + 53, 9, 8, 14
 local CARD_W = PANE_W - PAD_L - PAD_R - BAR - 6
+-- Два шаблона: длинная вкладка (резерв под полосу прокрутки, рамки уже на BAR) и короткая (полосы нет, рамки на всю ширину).
+-- Шаблон выбирается при построении вкладки; fill_sub каждый раз начинает с длинного, короткая вкладка переключается сама
+local FW = CARD_W
+local FIT = 430      -- сколько высоты области прокрутки считаем «влезет без полосы» (максимум 470 минус поля)
 local function full_width(f, parent)
-  if parent.type == "scroll-pane" then f.style.minimal_width = CARD_W end
+  if parent.type == "scroll-pane" then f.style.minimal_width = FW end
+end
+local function short_tab(pane, short)
+  if short then
+    pane.vertical_scroll_policy = "auto"
+    FW = CARD_W + BAR
+  end
 end
 -- карточка с заголовком (светлее) и тёмная рамка под данные
 local function card_frame(parent, title, tip)
@@ -106,12 +116,12 @@ local function reset_bar(p, pane, sec)
   local b = row.add{type = "button", caption = {"tr-gui.reset"}, tooltip = {"tr-gui.tip-reset"}, tags = {tr = "reset", sec = sec}}
   b.style.height = 24
   b.style.minimal_width = 0
-  b.style.padding = {0, 8}
+  b.style.padding = {0, 8, 2, 8}
   if RST.can_undo(sec) then
     local u = row.add{type = "button", caption = {"tr-gui.undo"}, tooltip = {"tr-gui.tip-undo"}, tags = {tr = "undo", sec = sec}}
     u.style.height = 24
     u.style.minimal_width = 0
-    u.style.padding = {0, 8}
+    u.style.padding = {0, 8, 2, 8}
   end
 end
 local function bar(parent, value, caption, width, tooltip)
@@ -288,12 +298,33 @@ local function intro(p, pane)
   local hide = box.add{type = "button", caption = {"tr-gui.intro-hide"}, tooltip = {"tr-gui.intro-hide-tip"}, tags = {tr = "pcfg_set", key = "intro", value = false}}
   hide.style.height = 22
   hide.style.minimal_width = 0
-  hide.style.padding = {0, 6}
+  hide.style.padding = {0, 6, 2, 6}
   hide.style.top_margin = 4
 end
 
 -- блок «Полезно знать»: главные факты в паре строк и подсказка, которая меняется раз в минуту
-local TIPS = 20
+local TIPS = 35
+local TIP_PERIOD = 3600
+-- совет хранится у игрока: сменить его можно кнопкой обновления (тогда следующая автосмена через половину срока) или по таймеру
+local function next_tip(p, manual)
+  local gs = GS(p)
+  gs.tip_idx = ((gs.tip_idx or math.floor(game.tick / TIP_PERIOD)) % TIPS) + 1
+  gs.tip_tick = game.tick - (manual and TIP_PERIOD / 2 or 0)
+end
+local function fill_tipbar(p, frame)
+  local bar = frame and frame.valid and frame.tr_tipbar
+  if not (bar and bar.valid) then return end
+  bar.visible = C.P(p, "tips") ~= false
+  if not bar.visible then return end
+  local gs = GS(p)
+  if not gs.tip_idx then next_tip(p, false) end
+  bar.tr_tiptext.caption = {"", "[img=utility/tip_icon] ", {"tr-tips.t" .. ((gs.tip_idx - 1) % TIPS + 1)}}
+end
+local function tip_due(p)
+  local gs = GS(p)
+  return not gs.tip_tick or game.tick - gs.tip_tick >= TIP_PERIOD
+end
+
 local function good_to_know(p, pane)
   if not C.P(p, "know") then return end       -- игрок скрыл (Настройки или кнопка ниже)
   local box = card_frame(pane, {"tr-gui.know-head"})
@@ -309,14 +340,10 @@ local function good_to_know(p, pane)
     local lb = wrap(box.add{type = "label", caption = {"", "· ", l}}, W - 90)
     lb.style.font_color = {0.8, 0.8, 0.8}
   end
-  local tip = (math.floor(game.tick / 3600) + (GS(p).tip_shift or 0)) % TIPS + 1
-  local tl = wrap(box.add{type = "label", caption = {"", "[img=utility/tip_icon] ", {"tr-tips.t" .. tip}}}, W - 90)
-  tl.style.top_margin = 6
-  tl.style.font_color = {1, 0.9, 0.6}
   local hide = box.add{type = "button", caption = {"tr-gui.know-hide"}, tooltip = {"tr-gui.know-hide-tip"}, tags = {tr = "pcfg_set", key = "know", value = false}}
   hide.style.height = 22
   hide.style.minimal_width = 0
-  hide.style.padding = {0, 6}
+  hide.style.padding = {0, 6, 2, 6}
   hide.style.top_margin = 4
 end
 
@@ -450,9 +477,9 @@ local function fill_summary(p, pane)
     prow.style.horizontal_spacing = 8
     prow.add{type = "label", caption = {"", "[color=1,0.7,0.4]", {"tr-gui.sum-power-risk", risk, total}, "[/color]"}}
     local gb = prow.add{type = "button", caption = {"tr-gui.sum-go-energy"}, tags = {tr = "goto", sub = "energy"}}
-    gb.style.height = 22
+    gb.style.height = 24
     gb.style.minimal_width = 0
-    gb.style.padding = {0, 8}
+    gb.style.padding = {0, 8, 2, 8}
   else
     st.add{type = "label", caption = {"", "[color=0.6,1,0.6]", {"tr-gui.sum-power-ok", total}, "[/color]"}}
   end
@@ -469,7 +496,7 @@ local function fill_summary(p, pane)
     local pgb = plrow.add{type = "button", caption = {"tr-gui.sum-go-platforms"}, tags = {tr = "goto", sub = "platforms"}}
     pgb.style.height = 22
     pgb.style.minimal_width = 0
-    pgb.style.padding = {0, 8}
+    pgb.style.padding = {0, 8, 2, 8}
   end
 
   -- игроки: клик по имени — статистика
@@ -484,7 +511,7 @@ local function fill_summary(p, pane)
     local b = prow.add{type = "button", caption = name, tags = {tr = "sum_card", who = name}, tooltip = {"tr-gui.open-card"}, toggled = gs.sum_card == name}
     b.style.height = 26
     b.style.minimal_width = 0
-    b.style.padding = {0, 8}
+    b.style.padding = {0, 8, 2, 8}
   end
   if gs.sum_card then
     local cbox = deep_frame(pcard)
@@ -507,7 +534,7 @@ local function fill_summary(p, pane)
         tags = {tr = st == "idle" and "rou_start" or "rou_in"}}
       rb.style.height = 26
       rb.style.minimal_width = 0
-      rb.style.padding = {0, 10}
+      rb.style.padding = {0, 10, 2, 10}
     end
   end
 
@@ -523,7 +550,7 @@ local function fill_summary(p, pane)
     tags = {tr = "mvp_hist_toggle"}}
   hb.style.height = 22
   hb.style.minimal_width = 0
-  hb.style.padding = {0, 8}
+  hb.style.padding = {0, 8, 2, 8}
   if open then
     local hbox = deep_frame(card_frame(pane, {"tr-gui.mvp-hist-head"}))
     if #hist == 0 then muted(hbox, {"tr-gui.mvp-hist-none"}) end
@@ -549,6 +576,7 @@ end
 local function fill_where(p, pane)
   pane.clear()
   local rows = WH.rows(p)
+  short_tab(pane, #rows <= 10)
   if #rows == 0 then muted(pane, {"tr-gui.why-no-players"}) end
   local box = deep_frame(pane)
   box.style.top_margin = 2
@@ -660,11 +688,12 @@ local function fill_players(p, pane)
   if gs.card then fill_card(p, pane, gs.card); return end
   local d = C.D()
   local tbl = scope(p) == "total" and total_with_built(d) or d.shift
+  short_tab(pane, #game.players <= 6)
   local pcard = card_frame(pane, {sk(p, "tr-gui.players-scope")})
   muted(pcard, {"tr-gui.players-how"})
   if not next(tbl) then muted(pcard, {sk(p, "tr-gui.why-no-leaders")}) end
   local box = deep_frame(pcard)
-  local t = box.add{type = "table", column_count = #COLS + 3, draw_horizontal_line_after_headers = true, draw_horizontal_lines = true}
+  local t = box.add{type = "table", column_count = #COLS + 3, draw_horizontal_lines = true}
   t.style.horizontal_spacing = 4
   t.style.vertical_spacing = 4
   local function centered(lbl, width)
@@ -684,7 +713,7 @@ local function fill_players(p, pane)
     b.style.minimal_width = width
     b.style.horizontal_align = "center"
     b.style.height = 24
-    b.style.padding = {0, 2}
+    b.style.padding = {0, 2, 2, 2}
   end
   for _, c in ipairs(COLS) do header(c.key, {"tr-gui.col-" .. c.key}, {"tr-gui.tip-col-" .. c.key}, 66) end
   header("titles", {"tr-gui.col-titles"}, {"tr-gui.tip-col-titles"}, 56)
@@ -713,7 +742,7 @@ local function fill_players(p, pane)
     nb.style.height = 26
     nb.style.minimal_width = 130
     nb.style.horizontal_align = "left"
-    nb.style.padding = {0, 6}
+    nb.style.padding = {0, 6, 2, 6}
     for _, c in ipairs(COLS) do
       local v = r[c.key] or 0
       local cap = c.f(v)
@@ -758,6 +787,7 @@ local function fill_planets(p, pane)
     return a.key < b.key
   end)
   local done, open = C.count_mastered()
+  short_tab(pane, 90 + 150 * #rows <= FIT)
   local pcard = card_frame(pane, {"tr-gui.tab-planets"})
   local sbar = bar(pcard, #rows > 0 and done / #rows or 0, {"tr-gui.planets-summary", done, open, #rows}, 260)
   sbar.style.bottom_margin = 8
@@ -800,9 +830,10 @@ local function fill_planets(p, pane)
     end
     local ne = nbox.add{type = "button", caption = ned and {"tr-gui.native-done"} or {"tr-gui.native-edit"},
       tags = {tr = "nat_edit", planet = key}, tooltip = {"tr-gui.native-tip"}}
-    ne.style.height = 22
+    ne.style.height = 24
     ne.style.minimal_width = 0
-    ne.style.padding = {0, 8}
+    ne.style.padding = {0, 6, 2, 6}
+    ne.style.padding = {0, 8, 2, 8}
     if ned then
       local ebox = col.add{type = "frame", direction = "vertical", style = "inside_deep_frame"}
       ebox.style.horizontally_stretchable = true
@@ -827,7 +858,7 @@ local function fill_planets(p, pane)
         local rb = ebox.add{type = "button", caption = {"tr-gui.native-reset"}, tags = {tr = "cfg_native_auto", planet = key}}
         rb.style.height = 22
         rb.style.minimal_width = 0
-        rb.style.padding = {0, 8}
+        rb.style.padding = {0, 8, 2, 8}
         rb.style.top_margin = 4
         rb.enabled = p.admin
       end
@@ -863,13 +894,19 @@ local function fill_planets(p, pane)
       local tip = #list == 0 and {"tr-gui.tip-native-any"} or {"tr-gui.tip-native", why}
       local brow = col.add{type = "flow", direction = "horizontal"}
       brow.style.vertical_align = "center"
-      bar(brow, st.mastered and 1 or got / nsteps, {"tr-gui.planet-steps4", first and "✓" or "✗",
-        "[entity=" .. silo .. "]", st.silo and "✓" or "✗"}, 150, tip)
+      local brw = bar(brow, st.mastered and 1 or got / nsteps, nil, 150, tip)
+      local function step(cap, ok)
+        local sl = brw.add{type = "label", caption = cap, tooltip = tip}
+        sl.style.left_margin = 6
+        if not ok then sl.style.font_color = {0.6, 0.6, 0.6} end
+      end
+      step({"tr-gui.planet-step-land", first and "✓" or "✗"}, first)
+      step({"tr-gui.planet-step-silo", "[entity=" .. silo .. "]", st.silo and "✓" or "✗"}, st.silo)
       local pbox = brow.add{type = "flow", direction = "horizontal"}
       pbox.style.vertical_align = "center"
       pbox.style.left_margin = 10
       local pn = pbox.add{type = "label", caption = {"tr-gui.planet-native-head"}, tooltip = tip}
-      pn.style.font_color = {0.75, 0.75, 0.75}
+      for _, x in ipairs(packs) do if not x[3] then pn.style.font_color = {0.6, 0.6, 0.6} end end
       local ptab2 = pbox.add{type = "table", column_count = math.max(1, math.floor((W - 595) / 44))}
       ptab2.style.horizontal_spacing = 4
       ptab2.style.vertical_spacing = 2
@@ -878,7 +915,7 @@ local function fill_planets(p, pane)
         local cl2 = ptab2.add{type = "label", caption = "[item=" .. x[1] .. "]" .. orb .. " " .. (x[3] and "✓" or "✗"), tooltip = tip}
         cl2.style.minimal_width = 40
         cl2.style.single_line = true
-        cl2.style.font_color = {0.75, 0.75, 0.75}
+        if not x[3] then cl2.style.font_color = {0.6, 0.6, 0.6} end
       end
       local made = P.made_here(r.s)
       -- только то, что реально сделано здесь (пак с 0 не показываем)
@@ -958,7 +995,7 @@ local function fill_research(p, pane)
   local sbox = deep_frame(card_frame(pane, {"tr-gui.sci-head"}, {"tr-gui.sci-tip"}))
   local use = RS.consumption()
   if #use == 0 then muted(sbox, {"tr-gui.sci-none"}) else
-    local ut = sbox.add{type = "table", column_count = 4, draw_horizontal_line_after_headers = true}
+    local ut = sbox.add{type = "table", column_count = 4}
     ut.style.horizontal_spacing = 18
     for _, h in ipairs({"pack", "made", "spent", "where"}) do
       ut.add{type = "label", caption = {"tr-gui.sci-col-" .. h}, style = "caption_label"}
@@ -975,7 +1012,7 @@ local function fill_research(p, pane)
   local rows = RS.infinite_rows()
   local ibox = deep_frame(card_frame(pane, {"tr-gui.research-infinite"}))
   if #rows == 0 then muted(ibox, {"tr-gui.why-no-infinite"}) end
-  local t = ibox.add{type = "table", column_count = 3, draw_horizontal_line_after_headers = true}
+  local t = ibox.add{type = "table", column_count = 3}
   t.style.horizontal_spacing = 14
   for _, h in ipairs({"tech", "level", "gained"}) do
     t.add{type = "label", caption = {"tr-gui.research-col-" .. h}, style = "caption_label"}
@@ -990,7 +1027,7 @@ local function fill_research(p, pane)
   local ms = RS.milestone_rows()
   local mbox = deep_frame(card_frame(pane, {"tr-gui.research-milestones"}))
   if #ms == 0 then muted(mbox, {"tr-gui.research-milestones-none"}) else
-    local mt = mbox.add{type = "table", column_count = 1 + #RS.MILESTONES, draw_horizontal_line_after_headers = true}
+    local mt = mbox.add{type = "table", column_count = 1 + #RS.MILESTONES}
     mt.style.horizontal_spacing = 8
     mt.add{type = "label", caption = {"tr-gui.research-col-pack"}, style = "caption_label"}
     -- короткие заголовки (1, 1k, 10k ... 1M, 1B), чтобы все колонки влезли в окно
@@ -1063,7 +1100,7 @@ local function filter_button(p, parent, which, entries)
     tooltip = {"tr-gui.flt-tip"}, toggled = GS(p).flt_open == which}
   b.style.height = 24
   b.style.minimal_width = 0
-  b.style.padding = {0, 10}
+  b.style.padding = {0, 10, 2, 10}
   return b
 end
 
@@ -1150,7 +1187,7 @@ local function fill_combat(p, pane)
   for name, en in pairs(shift and s.enemies_shift or s.enemies) do arr[#arr + 1] = {name, en} end
   table.sort(arr, function(a, b) return a[2].n > b[2].n end)
   if #arr == 0 then muted(ebox, {sk(p, "tr-gui.why-no-kills")}) else
-    local t = ebox.add{type = "table", column_count = 3, draw_horizontal_line_after_headers = true}
+    local t = ebox.add{type = "table", column_count = 3}
     t.style.horizontal_spacing = 16
     for _, h in ipairs({"enemy", "count", "best"}) do t.add{type = "label", caption = {"tr-gui.combat-col-" .. h}, style = "caption_label"} end
     for i = 1, math.min(15, #arr) do
@@ -1255,6 +1292,7 @@ end
 local function fill_journal(p, pane)
   pane.clear()
   local j = C.D().journal
+  short_tab(pane, #j <= 10)
   if #j == 0 then muted(pane, {"tr-gui.why-no-journal"}); reset_bar(p, pane, "journal") return end
   local t = deep_frame(card_frame(pane, {"tr-gui.tab-journal"})).add{type = "table", column_count = 2}
   t.style.horizontal_spacing = 10
@@ -1275,6 +1313,9 @@ local function fill_records(p, pane)
   local d = C.D()
   local R = d.records
   local any = false
+  local nrec = 0
+  for _ in pairs(R) do nrec = nrec + 1 end
+  short_tab(pane, nrec <= 6)
   muted(pane, {"tr-gui.rec-intro"})
   local rbox = deep_frame(card_frame(pane, {"tr-gui.tab-records"}))
   local function line(caption)
@@ -1420,6 +1461,7 @@ local function fill_platforms(p, pane)
   end)
   local moving = 0
   for _, r in ipairs(rows) do if r.from then moving = moving + 1 end end
+  short_tab(pane, 120 + 260 * #rows + (GS(p).lost_open and 120 or 0) <= FIT)
   local srow = pane.add{type = "flow", direction = "horizontal"}
   srow.style.vertical_align = "center"
   srow.style.horizontally_stretchable = true
@@ -1431,7 +1473,7 @@ local function fill_platforms(p, pane)
       tags = {tr = "plat_lost_toggle"}}
     lb.style.height = 22
     lb.style.minimal_width = 0
-    lb.style.padding = {0, 8}
+    lb.style.padding = {0, 8, 2, 8}
     lb.style.left_margin = 8
   end
   local entries = {}
@@ -1495,7 +1537,7 @@ local function fill_platforms(p, pane)
       tags = {tr = "plat_pin", idx = idx}, tooltip = {"tr-plat.pin-tip"}}
     pb.style.height = 22
     pb.style.minimal_width = 0
-    pb.style.padding = {0, 8}
+    pb.style.padding = {0, 8, 2, 8}
     local sub = card.add{type = "label", caption = {"tr-plat.head-sub", r.st.trips, #tparts > 0 and C.join(tparts, " · ") or "0"}}
     sub.style.font_color = {0.7, 0.7, 0.7}
     -- 2) текущий полёт: [откуда] ====== 63% [куда] или «стоит у [планета]»
@@ -1580,7 +1622,7 @@ local function fill_platforms(p, pane)
         tags = {tr = "cargo_toggle", idx = idx}, tooltip = {"tr-plat.cargo-tip"}}
       tb.style.height = 22
       tb.style.minimal_width = 0
-      tb.style.padding = {0, 8}
+      tb.style.padding = {0, 8, 2, 8}
       if closed then
         local parts = {}
         for i, it in ipairs(r.cargo) do
@@ -1676,9 +1718,9 @@ local function fill_quality(p, pane)
           tags = {tr = "q_all", planet = key}, tooltip = {"tr-q.show-all-tip"}}
         cb.style.height = 22
         cb.style.minimal_width = 0
-        cb.style.padding = {0, 8}
+        cb.style.padding = {0, 8, 2, 8}
       end
-      local t = deep_frame(card).add{type = "table", column_count = 1 + #quals, draw_horizontal_line_after_headers = true}
+      local t = deep_frame(card).add{type = "table", column_count = 1 + #quals}
       t.style.horizontal_spacing = 8
       for i = 2, 1 + #quals do t.style.column_alignments[i] = "center" end
       local function qcell(lbl) lbl.style.minimal_width = 48; lbl.style.horizontal_align = "center"; return lbl end
@@ -1725,8 +1767,27 @@ local function energy_chip(r)
   if not h and not cur then return {"tr-en.chip-wait"}
   elseif cur == "none" then return {"tr-en.chip-out"}
   elseif cur then return {"tr-en.chip-low"}
-  elseif an and an.score >= 1 then return {"tr-en.chip-risk"}
+  elseif an and an.score >= 1 then
+    local k = an.reasons[1] and type(an.reasons[1]) == "table" and an.reasons[1][1] or ""
+    local chip = (k:find("fuel%-low") and "chip-r-fuellow") or (k:find("nofuel") or k:find("nofluid")) and "chip-r-fuel"
+      or (k:find("trend") and "chip-r-trend") or (k:find("night") and "chip-r-night")
+      or (k:find("demand") and "chip-r-demand") or (k:find("acc") and "chip-r-acc")
+      or (k:find("jump") and "chip-r-jump") or (k:find("drop") and "chip-r-drop") or "chip-risk"
+    return {"tr-en." .. chip}
   elseif an and an.idle then return {"tr-en.chip-idle"} end
+  return {"tr-en.chip-ok"}
+end
+
+local function plat_chip(r)
+  if r.kind == "none" then return {"tr-en.chip-out"}
+  elseif r.kind == "low" then return {"tr-en.chip-low"}
+  elseif r.kind == "empty" then return {"tr-en.chip-empty"} end
+  local k = r.reasons[1] and type(r.reasons[1]) == "table" and r.reasons[1][1] or ""
+  if r.score >= 2 then return {k:find("nosrc") and "tr-en.chip-nosrc" or "tr-en.chip-low"} end
+  if r.score >= 1 then
+    return {(k:find("fuel%-low") and "tr-en.chip-r-fuellow") or (k:find("trend") and "tr-en.chip-r-trend")
+      or (k:find("acc") and "tr-en.chip-r-acc") or "tr-en.chip-r-demand"}
+  end
   return {"tr-en.chip-ok"}
 end
 
@@ -1781,30 +1842,55 @@ local function energy_top3(h, by, total)
   return C.join(parts, "    ")
 end
 
--- одна запись журнала: время, планета, что было и сколько (+ причины при full)
+-- одна запись журнала: сверху общее (статус, планета, когда, как долго), при full ниже пояснение (что вероятно случилось)
 local function energy_entry(parent, e, full)
-  local head = {"", "[color=0.6,0.8,1]", C.clock(e.start), "[/color]  [font=default-bold]", C.planet_ls(e.key), "[/font] — ",
-    {"tr-en.kindn-" .. e.kind}, ", ", dur(EN.duration(e)),
-    (e.n or 1) > 1 and {"tr-en.log-repeat", e.n} or "",
+  local warn = (e.level or "red") == "warn"
+  local col = warn and "1,0.8,0.4" or (e.kind == "none" and "1,0.45,0.4" or "1,0.65,0.4")
+  local head = {"", "[font=default-bold]", e.plat and {"", "[img=entity/space-platform-hub] ", e.plat} or C.planet_ls(e.key), "[/font]  [color=" .. col .. "]",
+    {"tr-en.kindn-" .. e.kind}, "[/color]",
     e.done and {"tr-en.log-ago", dur(game.tick - (e.last or game.tick))} or {"tr-en.log-now"}}
   local hl = wrap(parent.add{type = "label", caption = head}, W - 110)
   hl.style.top_margin = 3
-  if full then
-    if e.why and #e.why > 0 then
-      for _, line in ipairs(e.why) do
-        -- закончившийся перебой — в прошедшем времени: «ключ-past»
-        local shown = line
-        if e.done and type(line) == "table" and type(line[1]) == "string" then
-          shown = {line[1] .. "-past"}
-          for i = 2, #line do shown[i] = line[i] end
-        end
-        local wl = wrap(parent.add{type = "label", caption = {"", "    · ", shown}}, W - 110)
-        wl.style.font_color = {0.85, 0.85, 0.85}
+  -- когда и сколько: точное игровое время начала и конца, длительность, повторы
+  local when = e.done and {"tr-en.log-when", C.clock_s(e.start), C.clock_s(e.last or e.start), dur(EN.duration(e))}
+    or {"tr-en.log-when-now", C.clock_s(e.start), dur(EN.duration(e))}
+  local wl = wrap(parent.add{type = "label", caption = {"", when, (e.n or 1) > 1 and {"tr-en.log-repeat", e.n} or ""}}, W - 110)
+  wl.style.font_color = {0.8, 0.8, 0.8}
+  if not full then return end
+  -- чего не было: сколько времени тока не было совсем, сколько просто не хватало
+  if not warn and ((e.t_none or 0) > 0 or (e.t_low or 0) > 0) then
+    local parts = {}
+    if (e.t_none or 0) > 0 then parts[#parts + 1] = {"tr-en.log-t-none", dur(e.t_none)} end
+    if (e.t_low or 0) > 0 then parts[#parts + 1] = {"tr-en.log-t-low", dur(e.t_low)} end
+    local ll = wrap(parent.add{type = "label", caption = C.join(parts, " · ")}, W - 110)
+    ll.style.font_color = {0.8, 0.8, 0.8}
+  end
+  if not warn and (e.share or 0) > 0 then
+    local shl = wrap(parent.add{type = "label", caption = {"tr-en.log-share", math.floor(e.share * 100 + 0.5)}}, W - 110)
+    shl.style.font_color = {0.8, 0.8, 0.8}
+  end
+  if e.cons and e.prod then
+    local nl = wrap(parent.add{type = "label", caption = {"tr-en.log-load", EN.power(e.cons), EN.power(e.prod)}}, W - 110)
+    nl.style.font_color = {0.8, 0.8, 0.8}
+  end
+  -- пояснение
+  local sh = parent.add{type = "label", caption = {e.done and "tr-en.log-why-head-past" or "tr-en.log-why-head"}}
+  sh.style.font_color = {1, 0.9, 0.6}
+  sh.style.top_margin = 2
+  if e.why and #e.why > 0 then
+    for _, line in ipairs(e.why) do
+      -- закончившийся перебой — в прошедшем времени: «ключ-past»
+      local shown = line
+      if e.done and type(line) == "table" and type(line[1]) == "string" then
+        shown = {line[1] .. "-past"}
+        for i = 2, #line do shown[i] = line[i] end
       end
-    else
-      local wl = wrap(parent.add{type = "label", caption = {"", "    · ", {e.done and "tr-en.why-unknown-past" or "tr-en.why-unknown"}}}, W - 110)
-      wl.style.font_color = {0.65, 0.65, 0.65}
+      local wl2 = wrap(parent.add{type = "label", caption = {"", "  · ", shown}}, W - 110)
+      wl2.style.font_color = {0.85, 0.85, 0.85}
     end
+  else
+    local wl3 = wrap(parent.add{type = "label", caption = {"", "  · ", {e.done and "tr-en.why-unknown-past" or "tr-en.why-unknown"}}}, W - 110)
+    wl3.style.font_color = {0.65, 0.65, 0.65}
   end
 end
 
@@ -1843,6 +1929,10 @@ local function fill_energy(p, pane)
         for _, line in ipairs(an.reasons) do tip[#tip + 1] = {"", "\n· ", line} end
       end
       if an.idle then tip = {"", {"tr-en.idle-tip"}} end
+      if #(an.notes or {}) > 0 then
+        tip = tip or {""}
+        for _, note in ipairs(an.notes) do tip[#tip + 1] = {"", "\n", note} end
+      end
       if h then
         local prod, cons = energy_top3(h, h.by_prod, h.prod), energy_top3(h, h.by_cons, h.cons)
         if prod or cons then
@@ -1858,22 +1948,59 @@ local function fill_energy(p, pane)
     end
   end
 
+  -- космические платформы: своя маленькая сеть, заряд и предельная нагрузка
+  local prows = EN.plat_rows()
+  if #prows > 0 then
+    local pt = deep_frame(card_frame(pane, {"tr-en.plat-head"}, {"tr-en.plat-tip"})).add{type = "table", column_count = 4}
+    pt.style.horizontal_spacing = 12
+    pt.style.vertical_spacing = 6
+    for _, r in ipairs(prows) do
+      local h = r.h
+      local tip = {""}
+      if #r.reasons > 0 then
+        tip[#tip + 1] = {"tr-en.chip-tip-head"}
+        for _, line in ipairs(r.reasons) do tip[#tip + 1] = {"", "\n· ", line} end
+        tip[#tip + 1] = "\n"
+      end
+      tip[#tip + 1] = {"tr-en.plat-tip-nums", EN.power(h.capw), EN.power(h.maxc), EN.power(h.cons), h.src_n or 0, h.acc_n or 0}
+      for _, note in ipairs(r.notes or {}) do tip[#tip + 1] = {"", "\n", note} end
+      local nl = pt.add{type = "label", caption = {"", "[img=entity/space-platform-hub] ", r.name, " ", plat_chip(r)}, tooltip = tip}
+      nl.style.minimal_width = 230
+      energy_load(pt, r, 120)
+      if not acc_bar(pt, h, 80) then pt.add{type = "label", caption = {"tr-en.plat-no-acc"}}.style.font_color = {0.6, 0.6, 0.6} end
+    end
+  end
+
   -- журнал: свёрнуто — одна строка, развёрнуто — каждая запись с причинами
   local log = EN.log()
   local lcard = card_frame(pane, {"tr-en.log-head"}, {"tr-en.tip-log"})
   local lbox = deep_frame(lcard)
   if #log == 0 then muted(lbox, {"tr-en.log-none"}) else
     local open = gs.en_log_open
+    -- общее вверху: сколько записей, сколько красных и жёлтых, сколько всего без нормального питания
+    local nred, nwarn, tred = 0, 0, 0
+    for _, e in ipairs(log) do
+      if (e.level or "red") == "warn" then nwarn = nwarn + 1 else nred = nred + 1; tred = tred + EN.duration(e) end
+    end
     if open then
-      for _, e in ipairs(log) do energy_entry(lbox, e, true) end
+      local sl = wrap(lbox.add{type = "label", caption = {"tr-en.log-summary", nred, nwarn, dur(tred)}}, W - 110)
+      sl.style.font_color = {1, 0.9, 0.6}
+      for i, e in ipairs(log) do
+        if i > 1 then
+          local sep = lbox.add{type = "line", direction = "horizontal"}
+          sep.style.top_margin = 6
+          sep.style.bottom_margin = 3
+        end
+        energy_entry(lbox, e, true)
+      end
     else
       energy_entry(lbox, log[1], false)
     end
     local tb = lbox.add{type = "button", caption = open and {"tr-en.log-hide"} or {"tr-en.log-show", #log},
       tags = {tr = "en_log_toggle"}}
-    tb.style.height = 22
+    tb.style.height = 24
     tb.style.minimal_width = 0
-    tb.style.padding = {0, 8}
+    tb.style.padding = {0, 8, 2, 8}
     tb.style.top_margin = 6
   end
   muted(pane, {"tr-en.hint3"})
@@ -1901,6 +2028,7 @@ local function fill_destruction(p, pane)
     if la ~= lb then return la > lb end
     return src[a] > src[b]
   end)
+  short_tab(pane, #keys <= 2)
   local total, by_enemy = 0, 0
   for _, k in ipairs(keys) do
     total = total + src[k]
@@ -2048,7 +2176,10 @@ end
 
 local function pane_of(frame, g, sub)
   local tabs = frame.tr_tabs
-  if #g.subs == 1 then return tabs["tr_pane_" .. sub] end
+  if #g.subs == 1 then
+    local one = tabs["tr_grp_" .. g.id]
+    return one and one["tr_pane_" .. sub]
+  end
   local holder = tabs["tr_grp_" .. g.id]
   return holder and holder["tr_sub_" .. g.id] and holder["tr_sub_" .. g.id]["tr_pane_" .. sub]
 end
@@ -2069,6 +2200,8 @@ end
 local function fill_sub(p, frame, g, sub)
   local pane = pane_of(frame, g, sub[1])
   if not pane then return end
+  FW = CARD_W
+  pane.vertical_scroll_policy = "auto-and-reserve-space"
   local ok, err = pcall(sub[2], p, pane)
   if not ok then
     log("Factory Radar GUI error in " .. sub[1] .. ": " .. tostring(err))
@@ -2134,7 +2267,7 @@ local function sync_filter(p)
     b.style.horizontal_align = "left"
     b.style.height = 30
     b.style.width = 200
-    b.style.padding = {0, 6}
+    b.style.padding = {0, 6, 2, 6}
     b.style.bottom_margin = 1
   end
   local row = box.add{type = "flow", direction = "horizontal"}
@@ -2143,7 +2276,7 @@ local function sync_filter(p)
   local all = row.add{type = "button", caption = {nh == 0 and "tr-gui.flt-none" or "tr-gui.flt-all"}, tags = {tr = "flt_all", which = which}}
   all.style.height = 22
   all.style.minimal_width = 0
-  all.style.padding = {0, 6}
+  all.style.padding = {0, 6, 2, 6}
 end
 
 -- шапка и открытая вкладка: остальные не строятся, пока не откроешь (строить вкладку — дорого)
@@ -2151,6 +2284,7 @@ function M.refresh(p)
   local frame = p.gui.screen[FRAME]
   if not frame then return end
   pcall(fill_header, p, frame.tr_header)
+  pcall(fill_tipbar, p, frame)
   local g, sub = active_sub(p, frame)
   if g then
     -- окно высотой с открытую вкладку: у ушедших вкладок содержимого нет (tabbed-pane равен самой большой)
@@ -2326,10 +2460,10 @@ local SLOW_TABS = {titles = true, achievements = true, help = true}
 function M.autorefresh()
   for _, p in pairs(game.connected_players) do
     keep_opened(p)
-    if game.tick % 300 == 0 and p.gui.screen[FIND] then M.refresh_find(p) end
     -- на окно АФК-игрока никто не смотрит: не перерисовываем, пока не двинется
     local frame = p.afk_time <= 5 * 3600 and p.gui.screen[FRAME] or nil
     if frame then
+      if tip_due(p) then next_tip(p, false); pcall(fill_tipbar, p, frame) end   -- раз в минуту новый совет
       if live_platforms(p, frame) or live_where(p, frame) or live_summary(p, frame) or live_energy(p, frame) then M.refresh_active(p) end
       local secs = C.P(p, "autorefresh") or 0
       if secs > 0 then
@@ -2422,139 +2556,242 @@ local function mark_chests(p, s, list)
     end
   end
 end
--- подпись места: значок и название в одной кнопке, как в панели «Какие планеты показывать»
+-- подпись места: значок и название (у платформы значок хаба и имя)
 local function place_caption(planet, platform)
   if planet then return C.planet_ls(planet) end
-  return {"", "[img=entity/space-platform-hub] ", {"tr-find.platform", platform}}
+  return {"", "[img=entity/space-platform-hub] ", platform}
 end
 
-local function fill_find_details(p, box)
+-- включённые места поиска: логсети и игроки по умолчанию включены, остальные нет
+local function find_opts(gs)
+  return {net = gs.find_net ~= false, ply = gs.find_ply ~= false, scan = gs.find_scan and true or false, mach = gs.find_mach and true or false}
+end
+
+-- заголовок секции и тёмная рамка под данные
+local function find_section(parent, title)
+  local f = parent.add{type = "flow", direction = "vertical"}
+  f.style.top_margin = 8
+  local l = f.add{type = "label", caption = title, style = "caption_label"}
+  l.style.bottom_margin = 3
+  local box = f.add{type = "frame", direction = "vertical", style = "inside_deep_frame"}
+  box.style.horizontally_stretchable = true
+  box.style.padding = 6
+  return box
+end
+
+-- строка списка: место (кнопка) и сколько там
+local ROW_W = 360
+local LIST_H = 5 * 29 + 4   -- five rows are shown, the rest scrolls
+local function find_row(t, caption, tags, tip, chosen, count, icon)
+  local fl = t.add{type = "flow", direction = "horizontal"}
+  fl.style.horizontal_spacing = 0
+  fl.style.horizontally_stretchable = true
+  fl.style.vertical_align = "center"
+  local b = fl.add{type = "button", caption = caption, toggled = chosen and true or false, tags = tags, tooltip = tip}
+  b.style.horizontal_align = "left"
+  b.style.height = 28
+  b.style.minimal_width = ROW_W
+  b.style.horizontally_stretchable = true
+  b.style.padding = {0, 6}
+  -- число со значком предмета лежит поверх правого края кнопки (клик проходит сквозь него), чёрное и по центру кнопки
+  local cnt = fl.add{type = "label", caption = {"", C.big(count), " ", icon or ""}, style = "bold_label", ignored_by_interaction = true}
+  cnt.style.width = 120
+  cnt.style.height = 28
+  cnt.style.vertical_align = "center"
+  cnt.style.horizontal_align = "right"
+  cnt.style.right_padding = 10
+  cnt.style.left_margin = -120
+  cnt.style.font_color = {0, 0, 0}
+end
+
+-- планеты и платформы с предметом: считается только то, что включено галочками; больше всего первыми
+local function find_places(p, it)
+  local gs = GS(p)
+  local o = find_opts(gs)
+  local by, list, total = {}, {}, 0
+  local function add(planet, platform, src, n)
+    if not (n and n > 0) then return end
+    local k = planet or ("pf:" .. platform)
+    local r = by[k]
+    if not r then r = {planet = planet, platform = platform, count = 0, src = {}}; by[k] = r; list[#list + 1] = r end
+    r.count = r.count + n
+    r.src[src] = (r.src[src] or 0) + n
+    total = total + n
+  end
+  if o.net then for _, r in ipairs((LG.search(it.name, it.quality))) do add(r.planet, r.platform, "net", r.count) end end
+  if o.ply then for _, c in ipairs(LG.carried(it.name, it.quality)) do add(c.planet, c.platform, "ply", c.count) end end
+  local job = LG.scan_job(p.index)
+  if job then
+    if o.scan then for key, r in pairs(job.done or {}) do add(key, nil, "out", r.count) end end
+    if o.mach then for key, r in pairs(job.mach or {}) do add(key, nil, "mach", r.count) end end
+  end
+  table.sort(list, function(a, b)
+    if a.count ~= b.count then return a.count > b.count end
+    return (a.planet or a.platform or "") < (b.planet or b.platform or "")
+  end)
+  return list, total, job
+end
+
+-- подсказка к строке места: из чего сложено число
+local function row_tip(r)
+  local t = {""}
+  for _, k in ipairs({"net", "ply", "out", "mach"}) do
+    if r.src[k] then
+      if #t > 1 then t[#t + 1] = "\n" end
+      t[#t + 1] = {"tr-find.src-" .. k, C.big(r.src[k])}
+    end
+  end
+  t[#t + 1] = "\n"
+  t[#t + 1] = {"tr-find.row-tip"}
+  return t
+end
+
+-- что лежит на выбранном месте, по включённым галочкам: логсети, игроки, обычные контейнеры, машины
+local function place_data(p, sel)
+  local gs = GS(p)
+  local it = gs.find_item
+  local s = find_surface(sel.planet, sel.platform)
+  if not (it and s and s.valid) then return nil end
+  local o = find_opts(gs)
+  local secs = {}
+  if o.net then
+    local list, found, _, n_all = LG.chests(s, it.name, it.quality, 1000)
+    secs[#secs + 1] = {key = "net", list = list, found = found, n_all = n_all}
+  end
+  local job = LG.scan_job(p.index)
+  if sel.planet and job then
+    if o.scan then
+      local r = job.done and job.done[sel.planet]
+      secs[#secs + 1] = {key = "out", list = r and r.list or {}, found = r and r.count or 0, n_all = r and r.chests or 0, pending = (not r) and not job.finished}
+    end
+    if o.mach then
+      local r = job.mach and job.mach[sel.planet]
+      secs[#secs + 1] = {key = "mach", list = r and r.list or {}, found = r and r.count or 0, n_all = r and r.chests or 0, pending = (not r) and not job.finished}
+    end
+  end
+  if o.ply then
+    local list, sum = {}, 0
+    for _, c in ipairs(LG.carried(it.name, it.quality)) do
+      if c.surface == s.index then
+        list[#list + 1] = {name = "character", count = c.count, x = c.x, y = c.y, player = c.player, quality = "normal"}
+        sum = sum + c.count
+      end
+    end
+    secs[#secs + 1] = {key = "ply", list = list, found = sum, n_all = #list}
+  end
+  return s, secs
+end
+
+-- подробности выбранного места. Координаты не в строке, а в подсказке
+local function fill_find_details(p, box, s, secs)
   box.clear()
   local gs = GS(p)
-  local sel = gs.find_det
-  local it = gs.find_item
-  if not (sel and it) then return end
-  local where = sel.planet and C.planet_ls(sel.planet) or {"tr-find.platform", sel.platform}
-  local head = box.add{type = "label", caption = {sel.outside and "tr-find.det-head-out" or "tr-find.det-head", where, C.big(sel.found or 0)},
-    style = "caption_label"}
-  head.style.top_margin = 6
-  if #sel.list == 0 then muted(box, {"tr-find.det-none"}) return end
-  -- сеть насчитала больше, чем нашлось в контейнерах: остальное в машинах, роботах или контейнерах особого вида
-  if not sel.outside and (sel.total or 0) > (sel.found or 0) * 1.02 + 1 then
-    local types = {}
-    for ty, n in pairs(sel.unknown or {}) do types[#types + 1] = ty .. " x" .. n end
-    table.sort(types)
-    local m = muted(box, {"tr-find.det-rest", C.big((sel.total or 0) - (sel.found or 0)), #types > 0 and table.concat(types, ", ") or "-"})
-    m.style.single_line = false
-    m.style.maximal_width = 420
-  end
-  if (sel.n_all or #sel.list) > #sel.list then muted(box, {"tr-find.det-more", #sel.list, sel.n_all}) end
-  local sp = box.add{type = "scroll-pane", direction = "vertical"}
-  sp.horizontal_scroll_policy = "auto"
-  sp.style.maximal_height = 260
-  sp.style.minimal_width = 440
+  local sel, it = gs.find_det, gs.find_item
+  if not (sel and it and s) then return end
+  local head = box.add{type = "label", caption = {"tr-find.det-place", place_caption(sel.planet, sel.platform)}, style = "caption_label"}
+  head.style.top_margin = 10
   local icon = item_icon(it)
-  for _, c in ipairs(sel.list) do
-    local pr = prototypes.entity[c.name]
-    -- у игрока вместо контейнера его значок и никнейм
-    local who = (c.player ~= nil) and (c.player or {"tr-find.no-player"}) or (pr and pr.localised_name or c.name)
-    local b = sp.add{type = "button",
-      caption = {"", "[entity=" .. c.name .. ((c.quality and c.quality ~= "normal") and (",quality=" .. c.quality) or "") .. "]  ", who,
-        "   ", C.big(c.count), " ", icon,
-        "   (", math.floor(c.x), ", ", math.floor(c.y), ")"},
-      tags = {tr = "find_chest", s = sel.surface, x = c.x, y = c.y}, tooltip = {"tr-find.det-tip"}}
-    b.style.horizontal_align = "left"
-    b.style.height = 30
-    b.style.minimal_width = 420
-    b.style.padding = {0, 6}
+  local shown = 0
+  for _, sec in ipairs(secs) do
+    if sec.pending or #sec.list > 0 then
+      shown = shown + 1
+      local inner = find_section(box, {"tr-find.sec-" .. sec.key, C.big(sec.found)})
+      if sec.pending then
+        muted(inner, {"tr-find.scan-wait"})
+      else
+        local lst = inner.add{type = "scroll-pane", direction = "vertical"}
+        lst.horizontal_scroll_policy = "never"
+        lst.vertical_scroll_policy = "auto-and-reserve-space"
+        lst.style.maximal_height = LIST_H
+        lst.style.minimal_width = 400
+        lst.style.padding = 0
+        local col = lst.add{type = "flow", direction = "vertical"}
+        col.style.vertical_spacing = 1
+        col.style.horizontally_stretchable = true
+        for _, c in ipairs(sec.list) do
+          local pr = prototypes.entity[c.name]
+          local who = c.player or (pr and pr.localised_name or c.name)
+          find_row(col, {"", "[entity=" .. c.name .. ((c.quality and c.quality ~= "normal") and (",quality=" .. c.quality) or "") .. "]  ", who},
+            {tr = "find_chest", s = s.index, x = c.x, y = c.y},
+            {"tr-find." .. (sec.key == "ply" and "det-tip-player" or (sec.key == "mach" and "det-tip-machine" or "det-tip")), math.floor(c.x), math.floor(c.y)},
+            false, c.count, icon)
+        end
+        if sec.n_all > #sec.list then muted(inner, {"tr-find.det-more", #sec.list, sec.n_all}) end
+      end
+    end
   end
-end
-local function start_scan(p)
-  local it = GS(p).find_item
-  if it and it.name then LG.scan_start(p.index, it.name, it.quality or "normal") end
+  if shown == 0 then muted(box, {"tr-find.det-none"}) end
 end
 
--- блок «вне логистических сетей»
-local function fill_find_outside(p, res)
+local function start_scan(p)
   local gs = GS(p)
-  local job = LG.scan_job(p.index)
-  local sbox = res.add{type = "flow", direction = "vertical"}
-  sbox.style.top_margin = 8
-  sbox.add{type = "label", caption = {"tr-find.out-head"}, style = "caption_label"}
-  if not job then return end
-  if not job.finished then
-    muted(sbox, {"tr-find.scan-progress", job.total - #job.queue, job.total})
-  end
-  local rows = {}
-  for key, r in pairs(job.done) do if r.count > 0 then rows[#rows + 1] = {key = key, r = r} end end
-  table.sort(rows, function(a, b) return a.r.count > b.r.count end)
-  if #rows == 0 then
-    if job.finished then muted(sbox, {"tr-find.out-none"}) end
-    return
-  end
-  local sp = sbox.add{type = "scroll-pane", direction = "vertical"}
-  sp.horizontal_scroll_policy = "auto"
-  sp.style.maximal_height = 200
-  sp.style.minimal_width = 400
-  local t = sp.add{type = "table", column_count = 2}
-  t.style.horizontal_spacing = 8
-  t.style.vertical_spacing = 1
-  for _, x in ipairs(rows) do
-    local chosen = gs.find_det and gs.find_det.outside and gs.find_det.planet == x.key
-    local b = t.add{type = "button", caption = C.planet_ls(x.key), toggled = chosen and true or false,
-      tags = {tr = "find_go_out", planet = x.key}, tooltip = {"tr-find.out-tip", x.r.chests}}
-    b.style.horizontal_align = "left"
-    b.style.height = 30
-    b.style.width = 230
-    b.style.padding = {0, 6}
-    local cnt = t.add{type = "label", caption = C.big(x.r.count), style = "bold_label"}
-    cnt.style.horizontal_align = "right"
-    cnt.style.minimal_width = 100
+  local it = gs.find_item
+  if not (it and it.name) then return end
+  if gs.find_scan or gs.find_mach then
+    LG.scan_start(p.index, it.name, it.quality or "normal", {chests = gs.find_scan and true or false, machines = gs.find_mach and true or false})
+  else
+    LG.scan_cancel(p.index)
   end
 end
 
 local function fill_find_results(p, res)
-  res.clear()
   local gs = GS(p)
   local it = gs.find_item
-  if not (it and it.name and prototypes.item[it.name]) then
-    local m = muted(res, {"tr-find.hint"})
-    m.style.maximal_width = 380
-    m.style.single_line = false
+  local row = res.parent and res.parent.tr_find_row
+  local has_item = it and it.name and prototypes.item[it.name]
+  if row and row.tr_find_hint then row.tr_find_hint.visible = not has_item end
+  if not has_item then
+    res.clear()
+    gs.find_sig = nil
     return
   end
-  local rows, total = LG.search(it.name, it.quality)
-  local head = res.add{type = "label", caption = {"tr-find.total", loupe(), item_icon(it), C.big(total), #rows}, style = "caption_label"}
-  head.style.bottom_margin = 4
+  local rows, total, job = find_places(p, it)
+  local d = gs.find_det
+  local fs, secs
+  if d then fs, secs = place_data(p, d) end
+  -- ничего не изменилось с прошлого раза: окно не перестраиваем (иначе прокрутка прыгает вверх)
+  local sg = {it.name, it.quality or "", tostring(gs.find_net), tostring(gs.find_ply), tostring(gs.find_scan), tostring(gs.find_mach),
+    total, #rows, job and #job.queue or "-", d and (d.planet or d.platform) or "-"}
+  for _, r in ipairs(rows) do sg[#sg + 1] = (r.planet or r.platform) .. ":" .. r.count end
+  for _, sec in ipairs(secs or {}) do
+    local c1 = sec.list[1]
+    sg[#sg + 1] = sec.key .. ":" .. sec.found .. ":" .. #sec.list .. ":" .. tostring(sec.pending) .. ":" .. (c1 and (c1.x .. "," .. c1.y) or "-")
+  end
+  local sig = table.concat(sg, "|")
+  if gs.find_sig == sig and #res.children > 0 then return end
+  gs.find_sig = sig
+  res.clear()
+  local head = res.add{type = "label", name = "tr_find_head", caption = {"tr-find.total", loupe(), item_icon(it), C.big(total), #rows}, style = "caption_label"}
+  head.style.top_margin = 4
+  if job and not job.finished and (gs.find_scan or gs.find_mach) then
+    local pr = muted(res, {"tr-find.scan-progress", job.total - #job.queue, job.total})
+    pr.name = "tr_find_prog"
+  end
+  local inner = find_section(res, {"tr-find.sec-where"})
   if #rows == 0 then
-    muted(res, {"tr-find.none"})
+    muted(inner, {"tr-find.none"})
   else
-    local sp = res.add{type = "scroll-pane", direction = "vertical"}
-    sp.horizontal_scroll_policy = "auto"
-    sp.style.maximal_height = 280
+    local sp = inner.add{type = "scroll-pane", direction = "vertical"}
+    sp.horizontal_scroll_policy = "never"
+    sp.vertical_scroll_policy = "auto-and-reserve-space"
+    sp.style.maximal_height = LIST_H
     sp.style.minimal_width = 400
-    local t = sp.add{type = "table", column_count = 2}
-    t.style.horizontal_spacing = 8
+    sp.style.padding = 0
+    local t = sp.add{type = "flow", direction = "vertical"}
     t.style.vertical_spacing = 1
+    t.style.horizontally_stretchable = true
     for _, r in ipairs(rows) do
-      local chosen = gs.find_det and not gs.find_det.outside and gs.find_det.planet == r.planet and gs.find_det.platform == r.platform
-      local b = t.add{type = "button", caption = place_caption(r.planet, r.platform), toggled = chosen and true or false,
-        tags = {tr = "find_go", planet = r.planet, platform = r.platform, count = r.count}, tooltip = {"tr-find.nets", r.nets}}
-      b.style.horizontal_align = "left"
-      b.style.height = 30
-      b.style.width = 230
-      b.style.padding = {0, 6}
-      local cnt = t.add{type = "label", caption = C.big(r.count), style = "bold_label"}
-      cnt.style.horizontal_align = "right"
-      cnt.style.minimal_width = 100
+      local chosen = d and d.planet == r.planet and d.platform == r.platform
+      find_row(t, place_caption(r.planet, r.platform), {tr = "find_go", planet = r.planet, platform = r.platform}, row_tip(r), chosen, r.count, item_icon(it))
     end
   end
-  if gs.find_scan then fill_find_outside(p, res) end
   res.add{type = "flow", name = "tr_find_det", direction = "vertical"}
-  fill_find_details(p, res.tr_find_det)
+  fill_find_details(p, res.tr_find_det, fs, secs)
 end
 
-function M.refresh_find(p)
+-- auto: плановое обновление (если ничего не изменилось, окно не трогаем)
+function M.refresh_find(p, auto)
+  if not auto then GS(p).find_sig = nil end
   local f = p.gui.screen[FIND]
   if f and f.valid and f.tr_find_box and f.tr_find_box.tr_find_res then fill_find_results(p, f.tr_find_box.tr_find_res) end
 end
@@ -2563,36 +2800,39 @@ end
 function M.scan_tick()
   for _, pi in ipairs(LG.scan_step()) do
     local p = game.get_player(pi)
-    if p and p.valid then M.refresh_find(p) end
+    if p and p.valid then
+      local job = LG.scan_job(pi)
+      local f = p.gui.screen[FIND]
+      local res = f and f.valid and f.tr_find_box and f.tr_find_box.tr_find_res
+      local gs = GS(p)
+      if job and not job.finished and res and res.valid and res.tr_find_head and gs.find_item then
+        -- пока идёт просмотр: меняем только строку итога и прогресс, списки не трогаем (иначе прокрутка прыгает)
+        local rows, total = find_places(p, gs.find_item)
+        res.tr_find_head.caption = {"tr-find.total", loupe(), item_icon(gs.find_item), C.big(total), #rows}
+        if res.tr_find_prog then res.tr_find_prog.caption = {"tr-find.scan-progress", job.total - #job.queue, job.total} end
+      else
+        M.refresh_find(p, true)
+      end
+    end
   end
 end
 
--- клик по месту в сетях: перейти туда и показать контейнеры с предметом
-local function find_go(p, planet, platform, count)
+-- клик по месту: перейти туда, подсветить найденное и показать подробности
+local function find_go(p, planet, platform, no_move)
   local gs = GS(p)
-  local it = gs.find_item
-  local s = find_surface(planet, platform)
-  if not (it and s and s.valid) then return end
-  local list, found, unknown, n_all = LG.chests(s, it.name, it.quality, 300)
-  gs.find_det = {planet = planet, platform = platform, surface = s.index, list = list, found = found, total = count or found,
-    unknown = unknown, n_all = n_all}
-  mark_chests(p, s, list)
-  local pos = list[1] and {x = list[1].x, y = list[1].y} or {x = 0, y = 0}
-  pcall(function() p.set_controller{type = defines.controllers.remote, surface = s, position = pos} end)
-  M.refresh_find(p)
-end
-
--- клик по планете в блоке «вне сетей»
-local function find_go_out(p, planet)
-  local gs = GS(p)
-  local job = LG.scan_job(p.index)
-  local r = job and job.done[planet]
-  local s = find_surface(planet, nil)
-  if not (r and s and s.valid) then return end
-  gs.find_det = {planet = planet, surface = s.index, list = r.list, found = r.count, total = r.count, outside = true, n_all = r.chests}
-  mark_chests(p, s, r.list)
-  local pos = r.list[1] and {x = r.list[1].x, y = r.list[1].y} or {x = 0, y = 0}
-  pcall(function() p.set_controller{type = defines.controllers.remote, surface = s, position = pos} end)
+  gs.find_det = {planet = planet, platform = platform}
+  local s, secs = place_data(p, gs.find_det)
+  if not s then return end
+  local all, first = {}, nil
+  for _, sec in ipairs(secs) do
+    for _, c in ipairs(sec.list) do
+      all[#all + 1] = c
+      first = first or c
+    end
+  end
+  mark_chests(p, s, all)
+  local pos = first and {x = first.x, y = first.y} or {x = 0, y = 0}
+  if not no_move then pcall(function() p.set_controller{type = defines.controllers.remote, surface = s, position = pos} end) end
   M.refresh_find(p)
 end
 
@@ -2605,6 +2845,7 @@ end
 function M.toggle_find(p)
   local f = p.gui.screen[FIND]
   if f then close_find(p) return end
+  local gs = GS(p)
   f = p.gui.screen.add{type = "frame", name = FIND, direction = "vertical"}
   local tb = f.add{type = "flow", direction = "horizontal"}
   tb.drag_target = f
@@ -2613,35 +2854,51 @@ function M.toggle_find(p)
   local dr = tb.add{type = "empty-widget", style = "draggable_space_header", ignored_by_interaction = true}
   dr.style.horizontally_stretchable = true
   dr.style.height = 24
+  -- свернуть, обновить, закрыть
+  tb.add{type = "sprite-button", sprite = gs.find_min and "tr-win-max-d" or "tr-win-min-d", style = "frame_action_button", tags = {tr = "find_min"},
+    tooltip = {gs.find_min and "tr-find.expand-tip" or "tr-find.min-tip"}}
+  tb.add{type = "sprite-button", sprite = helpers.is_valid_sprite_path("utility/reset_white") and "utility/reset_white" or "utility/refresh",
+    style = "frame_action_button", tags = {tr = "find_refresh"}, tooltip = {"tr-find.refresh"}}
   tb.add{type = "sprite-button", sprite = "utility/close", style = "frame_action_button", tags = {tr = "find_close"}}
   local box = f.add{type = "frame", name = "tr_find_box", direction = "vertical", style = "inside_shallow_frame_with_padding"}
   local row = box.add{type = "flow", direction = "horizontal"}
   row.style.vertical_align = "center"
   row.style.horizontal_spacing = 8
-  row.style.bottom_margin = 6
-  row.add{type = "label", caption = {"tr-find.item"}}
+  row.style.bottom_margin = 4
+  row.name = "tr_find_row"
+  row.add{type = "label", caption = {"tr-find.item"}, style = "caption_label"}
   local ok, pick = pcall(function()
     return row.add{type = "choose-elem-button", elem_type = "item-with-quality", tags = {tr = "find_pick"}}
   end)
   if not ok then pick = row.add{type = "choose-elem-button", elem_type = "item", tags = {tr = "find_pick"}} end
-  local it = GS(p).find_item
+  local hint = row.add{type = "label", name = "tr_find_hint", caption = {"tr-find.hint"}}
+  hint.style.font_color = {0.65, 0.65, 0.65}
+  hint.style.single_line = false
+  hint.style.maximal_width = 280
+  local it = gs.find_item
   if it and it.name and prototypes.item[it.name] then
     pcall(function() pick.elem_value = (pick.elem_type == "item") and it.name or {name = it.name, quality = it.quality or "normal"} end)
   end
-  local fill = row.add{type = "empty-widget"}
-  fill.style.horizontally_stretchable = true
-  row.add{type = "sprite-button", sprite = "utility/refresh", style = "tool_button", tags = {tr = "find_refresh"}, tooltip = {"tr-find.refresh"}}
-  local cb = box.add{type = "checkbox", caption = {"tr-find.scan-check"}, state = GS(p).find_scan and true or false,
-    tags = {tr = "find_scan"}, tooltip = {"tr-find.scan-tip"}}
-  cb.style.bottom_margin = 6
+  -- где искать: слева быстрое (включено сразу), справа дольше (выключено)
+  local opts = box.add{type = "table", column_count = 2}
+  opts.style.horizontal_spacing = 24
+  opts.style.vertical_spacing = 2
+  opts.style.left_padding = 6
+  local o = find_opts(gs)
+  opts.add{type = "checkbox", caption = {"tr-find.net-check"}, state = o.net, tags = {tr = "find_net"}, tooltip = {"tr-find.net-tip"}}
+  opts.add{type = "checkbox", caption = {"tr-find.scan-check"}, state = o.scan, tags = {tr = "find_scan"}, tooltip = {"tr-find.scan-tip"}}
+  opts.add{type = "checkbox", caption = {"tr-find.ply-check"}, state = o.ply, tags = {tr = "find_ply"}, tooltip = {"tr-find.ply-tip"}}
+  opts.add{type = "checkbox", caption = {"tr-find.mach-check"}, state = o.mach, tags = {tr = "find_mach"}, tooltip = {"tr-find.mach-check-tip"}}
   box.add{type = "flow", name = "tr_find_res", direction = "vertical"}
-  if GS(p).find_scan then start_scan(p) end
+  if gs.find_scan or gs.find_mach then start_scan(p) end
   fill_find_results(p, box.tr_find_res)
+  box.visible = not gs.find_min
   pcall(function()
     local frame = p.gui.screen[FRAME]
     local loc, sc, res = frame and frame.location, p.display_scale, p.display_resolution
     if loc then
-      f.location = {x = math.floor(math.max(0, math.min(loc.x + (W + 100) * sc, res.width - 450 * sc))), y = math.floor(loc.y + 60 * sc)}
+      -- справа от главного окна, у верхнего края экрана (окно высокое, снизу ему не хватило бы места) и целиком в пределах экрана
+      f.location = {x = math.floor(math.max(0, math.min(loc.x + (W + 100) * sc, res.width - 580 * sc))), y = math.floor(math.max(0, math.min(loc.y, 30 * sc)))}
     else
       f.force_auto_center()
     end
@@ -2659,7 +2916,7 @@ function M.on_elem(e)
   else GS(p).find_item = nil end
   GS(p).find_det = nil
   clear_marks(p)
-  if GS(p).find_scan then
+  if GS(p).find_scan or GS(p).find_mach then
     if GS(p).find_item then start_scan(p) else LG.scan_cancel(p.index) end
   end
   M.refresh_find(p)
@@ -2678,9 +2935,9 @@ local function fill_quick(p, q)
     -- закреплённые: значок и имя; недавние: только значок (имя при наведении), чтобы ряд влезал
     local b = q.add{type = "button", caption = pinned and {"", s[3], " ", {"tr-gui.tab-" .. name}} or s[3],
       tags = {tr = "goto", sub = name}, tooltip = {"", {"tr-gui.tab-" .. name}, "\n", {pinned and "tr-gui.quick-pinned" or "tr-gui.quick-recent"}}}
-    b.style.height = 26
+    b.style.height = 28
     b.style.minimal_width = 0
-    b.style.padding = {0, 6}
+    b.style.padding = {0, 6, 2, 6}
     b.style.font = (name == cur) and "default-bold" or "default"
     if not pinned then b.style.font_color = {0.3, 0.3, 0.3} end
   end
@@ -2691,17 +2948,17 @@ local function fill_quick(p, q)
   local empty = q.add{type = "empty-widget"}
   empty.style.horizontally_stretchable = true
   local fb = q.add{type = "button", caption = {"", "[img=utility/search_icon] ", {"tr-gui.find-btn"}}, tags = {tr = "find_open"}, tooltip = {"tr-gui.find-tip"}}
-  fb.style.height = 26
+  fb.style.height = 28
   fb.style.minimal_width = 0
-  fb.style.padding = {0, 6}
+  fb.style.padding = {0, 6, 2, 6}
   if cur and cur ~= "settings" and cur ~= "help" then
     local is_pinned = false
     for _, n in ipairs(pins) do if n == cur then is_pinned = true end end
     local pb = q.add{type = "button", caption = {is_pinned and "tr-gui.unpin" or "tr-gui.pin"}, tags = {tr = "pin", sub = cur},
       tooltip = {is_pinned and "tr-gui.unpin-tip" or "tr-gui.pin-tip"}}
-    pb.style.height = 26
+    pb.style.height = 28
     pb.style.minimal_width = 0
-    pb.style.padding = {0, 6}
+    pb.style.padding = {0, 6, 2, 6}
   end
 end
 
@@ -2791,7 +3048,11 @@ function M.toggle(p)
     local tab = tabs.add{type = "tab", caption = {"", g.icon .. " ", {"tr-gui.grp-" .. g.id}}}
     local content
     if #g.subs == 1 then
-      content = new_pane(tabs, "tr_pane_" .. g.subs[1][1])
+      -- тот же стиль рамки, что игра рисует вокруг области вложенной вкладки: у вкладок без подвкладок обводка такая же
+      local holder = tabs.add{type = "frame", name = "tr_grp_" .. g.id, direction = "vertical", style = "tabbed_pane_frame"}
+      holder.style.horizontally_stretchable = true
+      new_pane(holder, "tr_pane_" .. g.subs[1][1])
+      content = holder
     else
       local holder = tabs.add{type = "flow", name = "tr_grp_" .. g.id, direction = "vertical"}
       local sub = holder.add{type = "tabbed-pane", name = "tr_sub_" .. g.id}
@@ -2809,6 +3070,14 @@ function M.toggle(p)
   end
   tabs.selected_tab_index = math.min(gi, #lay)
   if lay[tabs.selected_tab_index] then gs.tab_name = lay[tabs.selected_tab_index].id end
+  local tipbar = frame.add{type = "frame", name = "tr_tipbar", direction = "horizontal", style = "inside_shallow_frame_with_padding"}
+  tipbar.style.horizontally_stretchable = true
+  tipbar.style.top_margin = 4
+  tipbar.style.padding = {4, 10}
+  tipbar.style.vertical_align = "center"
+  local tt = tipbar.add{type = "label", name = "tr_tiptext", caption = ""}
+  wrap(tt, W + 40)
+  tt.style.font_color = {1, 0.9, 0.6}
   pcall(fill_quick, p, quick)
   frame.force_auto_center()
   M.refresh(p)
@@ -2852,7 +3121,7 @@ function M.popup(p, kind)
         local b = row.add{type = "button", caption = pl.name, tags = {tr = "mvp_vote", who = pl.name, popup = true}, toggled = mine == pl.name}
         b.style.height = 28
         b.style.minimal_width = 0
-        b.style.padding = {0, 10}
+        b.style.padding = {0, 10, 2, 10}
       end
     end
     if not any then muted(box, {"tr-gui.mvp-nobody"}) end
@@ -2864,17 +3133,17 @@ function M.popup(p, kind)
     local yes = row.add{type = "button", caption = {"tr-gui.rou-in"}, tags = {tr = "rou_in", popup = true}}
     yes.style.height = 28
     yes.style.minimal_width = 0
-    yes.style.padding = {0, 12}
+    yes.style.padding = {0, 12, 2, 12}
     local no = row.add{type = "button", caption = {"tr-gui.pop-decline"}, tags = {tr = "pop_close", frame = name}}
     no.style.height = 28
     no.style.minimal_width = 0
-    no.style.padding = {0, 12}
+    no.style.padding = {0, 12, 2, 12}
   end
   if kind == "mvp" then
     local cl = row.add{type = "button", caption = {"tr-gui.pop-close"}, tags = {tr = "pop_close", frame = name}}
     cl.style.height = 28
     cl.style.minimal_width = 0
-    cl.style.padding = {0, 10}
+    cl.style.padding = {0, 10, 2, 10}
   end
 end
 function M.popup_close(kind)
@@ -2983,8 +3252,13 @@ function M.on_click(e)
   elseif tag == "find_close" then
     close_find(p)
   elseif tag == "find_refresh" then M.refresh_find(p)
-  elseif tag == "find_go" then find_go(p, el.tags.planet, el.tags.platform, el.tags.count)
-  elseif tag == "find_go_out" then find_go_out(p, el.tags.planet)
+  elseif tag == "find_go" then find_go(p, el.tags.planet, el.tags.platform)
+  elseif tag == "find_min" then
+    gs.find_min = (not gs.find_min) or nil
+    local f = p.gui.screen[FIND]
+    if f and f.valid and f.tr_find_box then f.tr_find_box.visible = not gs.find_min end
+    el.tooltip = {gs.find_min and "tr-find.expand-tip" or "tr-find.min-tip"}
+    el.sprite = gs.find_min and "tr-win-max-d" or "tr-win-min-d"
   elseif tag == "find_chest" then
     local s = game.surfaces[el.tags.s]
     if s and s.valid then
@@ -3045,7 +3319,7 @@ function M.on_click(e)
     gs.evo_pick = gs.evo_pick or {}
     gs.evo_pick[el.tags.planet] = not el.tags.shown
     M.refresh(p)
-  elseif tag == "refresh" then gs.tip_shift = (gs.tip_shift or 0) + 1; M.refresh(p)
+  elseif tag == "refresh" then next_tip(p, true); M.refresh(p)
   elseif tag == "mvp_hist_toggle" then
     gs.mvp_hist_open = (not gs.mvp_hist_open) or nil
     M.refresh(p)
@@ -3084,10 +3358,15 @@ end
 
 function M.on_checked(e)
   local el = e.element
-  if el and el.valid and el.tags and el.tags.tr == "find_scan" then
+  local ft = el and el.valid and el.tags and el.tags.tr
+  if ft == "find_net" or ft == "find_ply" or ft == "find_scan" or ft == "find_mach" then
     local p = game.get_player(e.player_index)
-    GS(p).find_scan = el.state or nil
-    if el.state then start_scan(p) else LG.scan_cancel(p.index) end
+    if ft == "find_net" or ft == "find_ply" then
+      GS(p)[ft] = el.state and true or false
+    else
+      GS(p)[ft] = el.state or nil
+      start_scan(p)
+    end
     M.refresh_find(p)
     return
   end

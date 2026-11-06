@@ -248,14 +248,14 @@ do
   end
   for n = 2, #keys do EN.planet(keys[n]).refs = {} end              -- only the first planet has trouble
   local key1 = keys[1]
-  -- a dip of 5 seconds is not logged; a shortage of 12 seconds is, at once
+  -- a dip of 5 seconds is not logged; a shortage of 32 seconds is (30 s for "not enough")
   machine.status = 14
   for i = 1, 5 do game.tick = game.tick + 60; EN.fast() end
   machine.status = 1
   for i = 1, 3 do game.tick = game.tick + 60; EN.fast() end
   print("short dip logged:", #EN.log(), "(expected 0)")
   machine.status = 14
-  for i = 1, 12 do game.tick = game.tick + 60; EN.fast() end
+  for i = 1, 62 do game.tick = game.tick + 60; EN.fast() end
   local e1 = EN.log()[1]
   print("shortage logged:", #EN.log(), e1 and e1.key == key1 and "first planet" or "?", "done:", tostring(e1 and e1.done), "kind:", e1 and e1.kind, "(expected 1 first planet done false kind low: the dead network is ignored)")
   -- the tab shows it at once
@@ -267,20 +267,98 @@ do
   for i = 1, 3 do game.tick = game.tick + 60; EN.fast() end
   print("shortage closed:", tostring(EN.log()[1].done), "(expected true)")
   machine.status = 14
-  for i = 1, 12 do game.tick = game.tick + 60; EN.fast() end
+  for i = 1, 62 do game.tick = game.tick + 60; EN.fast() end
   print("repeat merged:", #EN.log(), "times:", EN.log()[1].n, "(expected 1, 2)")
   machine.status = 1
   for i = 1, 3 do game.tick = game.tick + 60; EN.fast() end
   -- more entries than the log holds
-  for i = 1, 14 do
+  for i = 1, 24 do
     local pe = EN.planet(keys[1])
     game.tick = game.tick + 11 * 3600
     machine.status = 14
-    for j = 1, 12 do game.tick = game.tick + 60; EN.fast() end
+    for j = 1, 62 do game.tick = game.tick + 60; EN.fast() end
     machine.status = 1
     for j = 1, 3 do game.tick = game.tick + 60; EN.fast() end
   end
-  print("log size:", #EN.log(), "(expected 10)")
+  print("log size:", #EN.log(), "(expected 20)")
+  -- a yellow entry: two risky measurements in a row write it, two calm ones close it
+  do
+    local pe = EN.planet("warn-test")
+    pe.hist = {{cons = 5e6, prod = 5e6}}
+    local risky = {score = 1, loggable = true, reasons = {{"tr-en.why-nofuel", 2, 3}}}
+    for i = 1, 14 do game.tick = game.tick + 1200; EN.warn_track(pe, "warn-test", risky, nil) end
+    print("warn not yet (14 of 15 measurements):", (EN.log()[1] and EN.log()[1].key == "warn-test") and "WRONG" or "ok")
+    game.tick = game.tick + 1200; EN.warn_track(pe, "warn-test", risky, nil)
+    local w = EN.log()[1]
+    print("warn logged:", w and w.key == "warn-test" and w.level == "warn" and not w.done and "ok" or "MISSING")
+    local calm = {score = 0, reasons = {}}
+    for i = 1, 3 do game.tick = game.tick + 1200; EN.warn_track(pe, "warn-test", calm, nil) end
+    print("warn closed:", EN.log()[1].done and "ok" or "STILL OPEN")
+    handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="goto", sub="energy"}}})
+    print("journal with yellow entry rendered:", "ok")
+    -- accumulators draining and not connected are explained
+    local an = EN.analyze({h = {prod = 0, cons = 8e6, capw = 8e6, stored = 3e9, cap = 1e10, acc_in = 0, acc_out = 8e6, acc_n = 5, acc_iso = 5, short = nil},
+      hist = {}, cur = nil, cur_known = true})
+    local keys_found = {}
+    for _, r in ipairs(an.reasons) do keys_found[#keys_found + 1] = r[1] end
+    print("acc reasons:", table.concat(keys_found, ","))
+    local function keys_of(a) local t = {} for _, r in ipairs(a.reasons) do t[#t + 1] = r[1] end return table.concat(t, ",") end
+    local night = {valid = true, freeze_daytime = false, daytime = 0.5, ticks_per_day = 25000, dusk = 0.25, evening = 0.45, morning = 0.55, dawn = 0.75}
+    local a1 = EN.analyze({h = {prod = 0, prod_ns = 0, cons = 5e6, capw = 5e6, stored = 1e8, cap = 1e9, acc_in = 0, acc_out = 5e6, acc_n = 5, solar = true},
+      hist = {}, cur = nil, cur_known = true, s = night})
+    print("night forecast short:", keys_of(a1):find("why%-night%-short") and "ok" or ("MISSING " .. keys_of(a1)))
+    local a2 = EN.analyze({h = {prod = 5e6, prod_ns = 0, cons = 5e6, capw = 9e6, stored = 2e8, cap = 2e8, acc_in = 0, acc_out = 0, acc_n = 5, solar = true},
+      hist = {}, cur = nil, cur_known = true, s = {valid = true, freeze_daytime = false, daytime = 0.0, ticks_per_day = 25000, dusk = 0.25, evening = 0.45, morning = 0.55, dawn = 0.75}})
+    print("day, capacity not enough for the night:", keys_of(a2):find("why%-night%-cap") and "ok" or ("MISSING " .. keys_of(a2)))
+    local a3 = EN.analyze({h = {prod = 0, cons = 5e6, capw = 5e6, stored = 0, cap = 0, acc_n = 0, fuel_miss = 2, fuel_n = 3, short = "low"},
+      hist = {}, cur = "low", cur_known = true})
+    print("no fuel reason:", keys_of(a3):find("why%-nofuel") and "ok" or ("MISSING " .. keys_of(a3)))
+    local a4 = EN.analyze({h = {prod = 5e6, cons = 4e6, capw = 5e6, stored = 5e8, cap = 1e9, acc_n = 4, acc_iso = 4}, hist = {}, cur = nil, cur_known = true})
+    print("isolated accumulators are only a note:", (a4.score == 0 and #a4.notes == 1) and "ok" or "WRONG")
+    -- an hour of history: growing consumption reaches the capacity; fuel that only goes down runs out
+    do
+      local hist = {}
+      for i = 1, 90 do
+        hist[i] = {tick = 1000 + i * 1200, prod = 10e6 + i * 2e5, cons = 10e6 + i * 2e5, capw = 40e6, stored = 0, cap = 0, acc_n = 0, by_prod = {}, by_cons = {},
+          fuel = 5e9 - i * 4e7}
+      end
+      local hh = hist[90]
+      local an5 = EN.analyze({h = hh, hist = hist, cur = nil, cur_known = true})
+      local ks = {}
+      for _, r in ipairs(an5.reasons) do ks[#ks + 1] = r[1] end
+      ks = table.concat(ks, ",")
+      print("trend reaches the capacity:", ks:find("why%-trend%-cap") and "ok" or ("MISSING " .. ks))
+      print("fuel running out:", ks:find("why%-fuel%-low") and "ok" or ("MISSING " .. ks))
+    end
+    -- a space platform: empty accumulators while the sources do not cover the demand are a red entry after three measurements
+    do
+      local stats = {output_counts = {}, input_counts = {}}
+      local pole = {valid = true, type = "electric-pole", name = "pole", electric_network_id = 1, electric_network_statistics = stats}
+      local acc = {valid = true, type = "accumulator", name = "accumulator", energy = 1e4, electric_buffer_size = 5e6}
+      local solar = {valid = true, type = "solar-panel", name = "solar-panel", prototype = {get_max_energy_production = function() return 1000 end}}
+      local mach = {valid = true, type = "assembling-machine", name = "assembling-machine", status = 1}
+      local sf = {valid = true, solar_power_multiplier = 1, find_entities_filtered = function(f)
+        if f.type == "electric-pole" then return {pole} elseif f.type == "accumulator" then return {acc} end
+        if type(f.type) == "table" and f.type[1] == "generator" then return {solar} end
+        return {mach}
+      end}
+      local pl = {valid = true, index = 77, name = "TestPlat", surface = sf}
+      table.insert(force.platforms, pl)
+      for i = 1, 3 do
+        game.tick = game.tick + 1300
+        stats.input_counts["assembling-machine"] = i * 6e8
+        stats.output_counts["solar-panel"] = i * 1e8
+        EN.sample_platform(pl)
+      end
+      local e = EN.log()[1]
+      print("platform red entry:", (e and e.plat == "TestPlat" and e.kind == "empty" and not e.done) and "ok" or "MISSING")
+      print("platform rows:", #EN.plat_rows() == 1 and "ok" or "WRONG")
+      handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="goto", sub="energy"}}})
+      handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="en_log_toggle"}}})
+      print("platform block rendered:", "ok")
+      table.remove(force.platforms)
+    end
+  end
   for i, e in ipairs(EN.log()) do if i <= 2 then print("   entry", i, e.key, e.start, e.last, e.n, tostring(e.done)) end end
   print("sig:", EN.sig() ~= "" and "ok" or "empty", "trouble_since:", #EN.trouble_since(0))
   handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="refresh"}}})
@@ -346,6 +424,7 @@ local ip = PANE("platforms")
 local function allt(e, key, out) out = out or {} if e.tags and e.tags.tr==key then out[#out+1]=e end for _,c in ipairs(e.children or {}) do allt(c, key, out) end return out end
 local shown = 0 for _,l in ipairs(allt(ip, "plat_idle")) do if l.visible then shown = shown + 1 end end
 print("idle labels visible:", shown, "(expected 1)")
+local function anytip(e, needle) if e.tooltip and flat(e.tooltip):find(needle, 1, true) then return true end for _,c in ipairs(e.children or {}) do if anytip(c, needle) then return true end end end
 local function anytext(e, needle) if e.caption and flat(e.caption):find(needle, 1, true) then return true end for _,c in ipairs(e.children or {}) do if anytext(c, needle) then return true end end end
 print("interrupt line:", (anytext(ip, "By interrupt") or anytext(ip, "По прерыванию")) and "ok" or "MISSING")
 print("cargo block:", (anytext(ip, "Other") or anytext(ip, "Прочее")) and "ok" or "MISSING")
@@ -489,13 +568,16 @@ do
     {valid=true, unit_number=4, type="logistic-container", name="buffer-chest", prototype={logistic_mode="buffer"}, position={x=30,y=31}, get_inventory=function() return {get_item_count=function(f) return 77 end} end},
     {valid=true, unit_number=5, type="logistic-container", name="requester-chest", prototype={logistic_mode="requester"}, position={x=40,y=41}, get_inventory=function() return {get_item_count=function(f) return 55 end} end}}
   handlers.on_gui_elem_changed({player_index=1, element={valid=true, tags={tr="find_pick"}, elem_value={name="iron-plate", quality="normal"}}})
+  -- the player's own character carries 12: it can be clicked too, the coordinates are in the tooltip
+  local oldch = p1.character
+  p1.character = {valid=true, surface=game.surfaces[1], position={x=70,y=71}, get_item_count=function() return 12 end}
   local go = findtag(ff, "find_go")
   handlers.on_gui_click({player_index=1, element=go})
-  print("find chests:", (anytext(ff, "(3, 4)") and anytext(ff, "(8, 9)")) and "ok" or "MISSING")
+  print("find chests:", (anytip(ff, "(3, 4)") and anytip(ff, "(8, 9)")) and "ok" or "MISSING")
   print("find chest row has name and item icon:", (anytext(ff, "storage-chest") and anytext(ff, "[item=iron-plate,quality=normal]")) and "ok" or "MISSING")
-  print("find player holding the item:", (anytext(ff, "Oleg") and anytext(ff, "(70, 71)")) and "ok" or "MISSING")
-  print("find foundry skipped:", anytext(ff, "(20, 20)") and "WRONG" or "ok")
-  print("find buffer chest:", (anytext(ff, "(30, 31)") and not anytext(ff, "(40, 41)") and not anytext(ff, "(50, 51)")) and "ok" or "MISSING/WRONG")
+  print("find player holding the item:", (anytext(ff, "bruklyn.ben") and anytip(ff, "(70, 71)") and findtag(ff, "find_chest", nil)) and "ok" or "MISSING")
+  print("find foundry skipped:", anytip(ff, "(20, 20)") and "WRONG" or "ok")
+  print("find buffer chest:", (anytip(ff, "(30, 31)") and not anytip(ff, "(40, 41)") and not anytip(ff, "(50, 51)")) and "ok" or "MISSING/WRONG")
   print("find marks drawn:", marks_made > 0 and "ok" or "MISSING")
   local ch = findtag(ff, "find_chest")
   handlers.on_gui_click({player_index=1, element=ch})
@@ -506,11 +588,18 @@ do
   game.surfaces[1].find_entities_filtered = function(f) if type(f.type) == "table" then return {outside, inside} end return {} end
   handlers.on_gui_checked_state_changed({player_index=1, element={valid=true, state=true, tags={tr="find_scan"}}})
   for i = 1, 6 do nth[7]() end
-  print("scan outside:", (anytext(ff, "61") and not anytext(ff, "500")) and "ok" or "MISSING")
-  handlers.on_gui_click({player_index=1, element=findtag(ff, "find_go_out")})
-  print("scan chest listed:", anytext(ff, "(100, 100)") and "ok" or "MISSING")
+  p1.character = oldch
+  print("scan outside:", (anytext(ff, "211") and not anytext(ff, "500")) and "ok" or "MISSING")
+  handlers.on_gui_click({player_index=1, element=findtag(ff, "find_go")})
+  print("scan chest listed:", anytip(ff, "(100, 100)") and "ok" or "MISSING")
   handlers.on_gui_checked_state_changed({player_index=1, element={valid=true, state=false, tags={tr="find_scan"}}})
   print("scan cancelled:", (storage.tr.find_job and storage.tr.find_job[1]) and "STILL" or "ok")
+  handlers.on_gui_checked_state_changed({player_index=1, element={valid=true, state=true, tags={tr="find_mach"}}})
+  for i = 1, 6 do nth[7]() end
+  handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="find_min"}}})
+  print("find minimized:", (p1.gui.screen.tr_find and p1.gui.screen.tr_find.tr_find_box and not p1.gui.screen.tr_find.tr_find_box.visible) and "ok" or "WRONG")
+  handlers.on_gui_click({player_index=1, element={valid=true, name="x", tags={tr="find_min"}}})
+  handlers.on_gui_checked_state_changed({player_index=1, element={valid=true, state=false, tags={tr="find_mach"}}})
   handlers.on_gui_elem_changed({player_index=1, element={valid=true, tags={tr="find_pick"}, elem_value=nil}})
   print("find cleared hint:", (anytext(ff, "Pick an item") or anytext(ff, "Выбери предмет")) and "ok" or "MISSING")
   game.tick = math.ceil(game.tick / 300) * 300; nth[60]()   -- the open search window refreshes itself every 5 seconds

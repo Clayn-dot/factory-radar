@@ -2,10 +2,13 @@
 Version: 1.1.1
 Date: 2026-11-06
   Changes:
-    - Window: the frames of Who's where, Players, Records, Destruction and Journal now have the same space on the left and on the right.
-    - Window: the planet cards fill the whole width.
-    - Summary: Combat and Destruction of the shift are one block with a single divider.
-    - FAQ: the answer about what counts as "Built" is corrected (robot building is counted only when the game knows whose ghost it was).
+    - Item search redesigned: planets and platforms in one list by amount, boxes for logistic networks, players, chests outside the networks and machines, the list of containers of the chosen place (five rows, then scrolling), coordinates in the tooltip, the window can be collapsed.
+    - Power grids: yellow warnings next to the red ones (no fuel or steam, fuel running out, the accumulators will not last until dawn, a fast drain, growing consumption), a journal with the exact game time, duration and causes, stricter conditions for entries. The capacity of the sources takes the quality of the buildings and the sun of the planet into account, an hour of history is kept.
+    - Power grids: a block for the space platforms (own small networks, charge of the accumulators, red and yellow states) and one common journal for planets and platforms.
+    - A tip is always visible at the bottom of the window, with more tips.
+    - Window: equal frame widths, planet cards fill the whole width, header columns in boxes, Summary combat and destruction in one block, the planet steps are grey while not done.
+    - Window title and texts say Factory Radar.
+    - FAQ: new answers about the item search and the power journal; the answer about what counts as "Built" is corrected.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2026-11-05
@@ -21,10 +24,13 @@ Date: 2026-11-05
 Version: 1.0.1
 Date: 2026-11-06
   Changes:
-    - Window: the frames of Who's where, Players, Records, Destruction and Journal now have the same space on the left and on the right.
-    - Window: the planet cards fill the whole width.
-    - Summary: Combat and Destruction of the shift are one block with a single divider.
-    - FAQ: the answer about what counts as "Built" is corrected (robot building is counted only when the game knows whose ghost it was).
+    - Item search redesigned: planets and platforms in one list by amount, boxes for logistic networks, players, chests outside the networks and machines, the list of containers of the chosen place (five rows, then scrolling), coordinates in the tooltip, the window can be collapsed.
+    - Power grids: yellow warnings next to the red ones (no fuel or steam, fuel running out, the accumulators will not last until dawn, a fast drain, growing consumption), a journal with the exact game time, duration and causes, stricter conditions for entries. The capacity of the sources takes the quality of the buildings and the sun of the planet into account, an hour of history is kept.
+    - Power grids: a block for the space platforms (own small networks, charge of the accumulators, red and yellow states) and one common journal for planets and platforms.
+    - A tip is always visible at the bottom of the window, with more tips.
+    - Window: equal frame widths, planet cards fill the whole width, header columns in boxes, Summary combat and destruction in one block, the planet steps are grey while not done.
+    - Window title and texts say Factory Radar.
+    - FAQ: new answers about the item search and the power journal; the answer about what counts as "Built" is corrected.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2026-11-05
