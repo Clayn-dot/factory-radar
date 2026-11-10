@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "Lua 5.2",
+  "workspace.checkThirdParty": false,
+  "workspace.ignoreDir": ["tests", "dist", "docs"],
+  "workspace.library": ["C:/Tools/factorio-api/2.1.23/factorio"],
+  "diagnostics.globals": [
+    "game", "script", "storage", "defines", "prototypes", "helpers", "rendering", "settings",
+    "remote", "commands", "rcon", "serpent", "log", "localised_print", "table_size", "util", "mods", "data"
+  ]
+}

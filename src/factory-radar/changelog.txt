@@ -1,0 +1,159 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.1.10
+Date: 2026-11-11
+  Changes:
+    - Shift report: the top planet now names its main builder, as intended (the name was always missing before).
+    - Internal cleanup: the code is split into smaller parts and its comments are in English. The window works as before.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.10
+Date: 2026-11-11
+  Changes:
+    - Shift report: the top planet now names its main builder, as intended (the name was always missing before).
+    - Internal cleanup: the code is split into smaller parts and its comments are in English. The window works as before.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.9
+Date: 2026-11-09
+  Changes:
+    - Space Exploration is now an optional dependency of the regular mod. When SE is active (without Space Age), its planets, moons, orbits and asteroid zones are shown with SE names and icons.
+    - SE planets, moons and other locations now appear in the planets, power, combat, science, quality, titles, records and item search tabs.
+    - Space Exploration science is not guessed by the old planet-discovery heuristics: manual overrides and "made here" statistics are used instead.
+    - The platforms tab is hidden when the game has no space platforms, as in Space Exploration.
+    - No separate SE mod is needed: the same zip works with Space Exploration, Space Age or vanilla.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.9
+Date: 2026-11-09
+  Changes:
+    - The same optional Space Exploration layer is included in the 2.0 build; it activates only if a compatible SE is installed.
+    - Planet and moon lookups now work through one shared layer, so modded planets without a space-location icon no longer break the window.
+    - Fixed a possible error when a modded building without a name is reported as built.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.8
+Date: 2026-11-09
+  Changes:
+    - Science: packs made on a space platform now show the platform in the milestones table and in "Made mostly on", instead of only the pack icon.
+    - Science: when the same pack is made on a planet and on a platform, the platform is shown instead of the planet.
+    - Science: the "Made mostly on" column now puts a space platform icon before the platform name, so a platform is easy to tell from a planet.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.8
+Date: 2026-11-09
+  Changes:
+    - Science: packs made on a space platform now show the platform in the milestones table and in "Made mostly on", instead of only the pack icon.
+    - Science: when the same pack is made on a planet and on a platform, the platform is shown instead of the planet.
+    - Science: the "Made mostly on" column now puts a space platform icon before the platform name, so a platform is easy to tell from a planet.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.7
+Date: 2026-11-08
+  Changes:
+    - Power grids on huge bases: a planet is now treated as large by the total number of buildings, not only by the number of power poles. On such planets the building counts are taken one at a time and without quality, so the power numbers are approximate, but the outage log is not affected.
+    - Power grids: building counts are taken one at a time on every planet, so a large base no longer gets a burst of several whole-map counts in one tick.
+    - Power grids: after a power pole, accumulator or generator is built, the planet is still rescanned within about 10 minutes, so a new outpost is not left unchecked for half an hour.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.7
+Date: 2026-11-08
+  Changes:
+    - Power grids on huge bases: a planet is now treated as large by the total number of buildings, not only by the number of power poles. On such planets the building counts are taken one at a time and without quality, so the power numbers are approximate, but the outage log is not affected.
+    - Power grids: building counts are taken one at a time on every planet, so a large base no longer gets a burst of several whole-map counts in one tick.
+    - Power grids: after a power pole, accumulator or generator is built, the planet is still rescanned within about 10 minutes, so a new outpost is not left unchecked for half an hour.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.6
+Date: 2026-11-08
+  Changes:
+    - New mod thumbnail: the radar as a shortcut button.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.6
+Date: 2026-11-08
+  Changes:
+    - New mod thumbnail: the radar as a shortcut button.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.5
+Date: 2026-11-08
+  Changes:
+    - Power grids: the first search of a big planet no longer waits a minute between steps, so the planets appear in the power tab within a minute or two after loading a big save.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.5
+Date: 2026-11-08
+  Changes:
+    - Power grids: the first search of a big planet no longer waits a minute between steps, so the planets appear in the power tab within a minute or two after loading a big save.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Date: 2026-11-08
+  Changes:
+    - Power grids on huge bases: the search for power poles works in small steps and remembers where poles were found, so a rescan no longer walks the whole map. The whole map is looked through again every 12 hours. Short freezes on bases with hundreds of thousands of buildings should be gone.
+    - Power grids: the outage check is spread over time. Busy planets are checked every few seconds instead of every second, and an outage on any planet is still noticed within seconds. On a very large planet the mod tracks up to 150 networks, and the building counts are taken one at a time and without quality, so those numbers are approximate. Small and medium bases work as before.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.4
+Date: 2026-11-08
+  Changes:
+    - Power grids on huge bases: the search for power poles works in small steps and remembers where poles were found, so a rescan no longer walks the whole map. The whole map is looked through again every 12 hours. Short freezes on bases with hundreds of thousands of buildings should be gone.
+    - Power grids: the outage check is spread over time. Busy planets are checked every few seconds instead of every second, and an outage on any planet is still noticed within seconds. On a very large planet the mod tracks up to 150 networks, and the building counts are taken one at a time and without quality, so those numbers are approximate. Small and medium bases work as before.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Date: 2026-11-07
+  Changes:
+    - Combat: the list of enemy forces is refreshed when a player changes force, so kills are counted correctly afterwards.
+    - Destruction: deconstruction marks are cleared when a building is destroyed in any other way, so they no longer pile up in the saved data.
+    - Internal: the code is split into smaller files by role, unused code removed. No change for players.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2026-11-07
+  Changes:
+    - Combat: the list of enemy forces is refreshed when a player changes force, so kills are counted correctly afterwards.
+    - Destruction: deconstruction marks are cleared when a building is destroyed in any other way, so they no longer pile up in the saved data.
+    - Internal: the code is split into smaller files by role, unused code removed. No change for players.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2026-11-07
+  Changes:
+    - Krastorio 2: Spaced Out and PlanetsLib are listed as optional dependencies, so the portal shows what the mod works with.
+    - When the space tabs open, everyone on the server is recorded as the first to land on the starting planet (it used to say "before install").
+---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 2026-11-06
+  Changes:
+    - Item search redesigned: planets and platforms in one list by amount, boxes for logistic networks, players, chests outside the networks and machines, the list of containers of the chosen place (five rows, then scrolling), coordinates in the tooltip, the window can be collapsed.
+    - Power grids: yellow warnings next to the red ones (no fuel or steam, fuel running out, the accumulators will not last until dawn, a fast drain, growing consumption), a journal with the exact game time, duration and causes, stricter conditions for entries. The capacity of the sources takes the quality of the buildings and the sun of the planet into account, an hour of history is kept.
+    - Power grids: a block for the space platforms (own small networks, charge of the accumulators, red and yellow states) and one common journal for planets and platforms.
+    - A tip is always visible at the bottom of the window, with more tips.
+    - The Planets and Platforms tabs and the planets box at the top open when the Rocket silo or the Space platform is researched (an admin can switch this off in Settings).
+    - Window: equal frame widths, planet cards fill the whole width, header columns in boxes, Summary combat and destruction in one block, the planet steps are grey while not done.
+    - Window title and texts say Factory Radar.
+    - FAQ: new answers about the item search and the power journal; the answer about what counts as "Built" is corrected.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 2026-11-05
+  Changes:
+    - First release for Factorio 2.1 (needs 2.1.7 or newer): the same mod as 1.0.0 for Factorio 2.0, adapted to the changes of 2.1 (recipe categories, fuel categories, the lightning damage).
+    - First release. One window for the team: who is where (jump in one click), player stats, titles and achievements, planets and their science, space platforms with route and cargo, combat and destruction, research, quality, power grids, journal, shift summaries and MVP vote.
+    - Item search over the logistic networks of planets and platforms, with the quality of the item and of the container, highlight on the map.
+    - Power grids: a planet where nothing is generated and nothing is consumed shows "no generation" instead of "enough".
+    - MVP: besides the votes the mod counts its own favourite of the shift. If nobody votes, the favourite becomes the MVP and the journal says why; if the favourite got no votes at all, the title "Unrecognized Genius".
+    - Shift summary in chat, admin reset and undo for every statistic, lightning strike on a friend, a fun quiz, titles in chat next to the name.
+    - Works with the base game, with Space Age and without, with Quality and without, with modded planets and enemies. Russian and English.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2026-11-07
+  Changes:
+    - Krastorio 2: Spaced Out and PlanetsLib are listed as optional dependencies, so the portal shows what the mod works with.
+    - When the space tabs open, everyone on the server is recorded as the first to land on the starting planet (it used to say "before install").
+---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 2026-11-06
+  Changes:
+    - Item search redesigned: planets and platforms in one list by amount, boxes for logistic networks, players, chests outside the networks and machines, the list of containers of the chosen place (five rows, then scrolling), coordinates in the tooltip, the window can be collapsed.
+    - Power grids: yellow warnings next to the red ones (no fuel or steam, fuel running out, the accumulators will not last until dawn, a fast drain, growing consumption), a journal with the exact game time, duration and causes, stricter conditions for entries. The capacity of the sources takes the quality of the buildings and the sun of the planet into account, an hour of history is kept.
+    - Power grids: a block for the space platforms (own small networks, charge of the accumulators, red and yellow states) and one common journal for planets and platforms.
+    - A tip is always visible at the bottom of the window, with more tips.
+    - The Planets and Platforms tabs and the planets box at the top open when the Rocket silo or the Space platform is researched (an admin can switch this off in Settings).
+    - Window: equal frame widths, planet cards fill the whole width, header columns in boxes, Summary combat and destruction in one block, the planet steps are grey while not done.
+    - Window title and texts say Factory Radar.
+    - FAQ: new answers about the item search and the power journal; the answer about what counts as "Built" is corrected.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2026-11-05
+  Changes:
+    - First release. One window for the team: who is where (jump in one click), player stats, titles and achievements, planets and their science, space platforms with route and cargo, combat and destruction, research, quality, power grids, journal, shift summaries and MVP vote.
+    - Item search over the logistic networks of planets and platforms, with the quality of the item and of the container, highlight on the map.
+    - Power grids: a planet where nothing is generated and nothing is consumed shows "no generation" instead of "enough".
+    - MVP: besides the votes the mod counts its own favourite of the shift. If nobody votes, the favourite becomes the MVP and the journal says why; if the favourite got no votes at all, the title "Unrecognized Genius".
+    - Shift summary in chat, admin reset and undo for every statistic, lightning strike on a friend, a fun quiz, titles in chat next to the name.
+    - Works with the base game, with Space Age and without, with Quality and without, with modded planets and enemies. Russian and English.

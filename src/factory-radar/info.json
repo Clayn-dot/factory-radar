@@ -1,0 +1,19 @@
+{
+  "name": "factory-radar",
+  "version": "1.0.10",
+  "title": "Factory Radar",
+  "author": "bruklynben",
+  "contact": "",
+  "homepage": "",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0.36",
+    "? space-age",
+    "? space-exploration",
+    "? quality",
+    "? Krastorio2-spaced-out",
+    "? PlanetsLib",
+    "(?) ups-guard"
+  ],
+  "description": "Your whole factory in one window. See what every planet produces, where your space platforms are and what they carry, where the power fails and why, how research goes, and find any item on planets, platforms and with players in one click. Just as useful in a solo game; with friends you also get who is where, titles and achievements, and some fun: a friendly lightning strike on a friend and a quiz with a prize nobody wants."
+}
