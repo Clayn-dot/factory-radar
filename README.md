@@ -20,22 +20,17 @@ Both come from the same source. A release of a mod on the portal has one game ve
 ```
 src/factory-radar/    the mod itself (info.json, control.lua, data*.lua, scripts/, locale/, graphics/)
   scripts/compat_se.lua  optional Space Exploration adapter (activates only when SE is installed)
-tests/                GUI test that runs the mod against a mock of the game API, and an rcon helper
 tools/                build.py (makes the zips), check.py (locale keys, changelog format)
 portal/               text of the mod portal page
 ```
 
-## Build and test
+## Build
 
 ```
 python tools/build.py              # dist/for-2.0/factory-radar_1.0.x.zip
 python tools/build.py --game 2.1   # dist/for-2.1/factory-radar_1.1.x.zip
 python tools/check.py              # ru/en keys match, changelog format
-pip install lupa
-python tests/run_tr.py ru          # GUI test without the game (also: en, STRESS=1, STRICT=1, SE=1)
 ```
-
-The tests do not replace a run in the game. The mock only checks that every tab builds and that no text keys are missing.
 
 ## Notes for contributors
 
