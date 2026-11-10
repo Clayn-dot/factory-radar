@@ -1,6 +1,6 @@
 # Factory Radar
 
-A Factorio mod: one window that shows what happens in your factory and in your team. Planets and their science, space platforms with routes and cargo, power grids, research, quality, combat, an item search over planets, platforms and players, power grids with warnings and a journal, and for co-op: who is where, shift summaries, MVP vote, titles and achievements.
+A Factorio mod: one window that shows what happens in your factory and in your team. Planets and their science, space platforms with routes and cargo, research, quality, combat, an item search over planets, platforms and players, power grids with warnings and a journal, and for co-op: who is where, shift summaries, MVP vote, titles and achievements.
 
 Works in a solo game and with friends. Factorio 2.0 and 2.1, with or without Space Age and Quality. Languages: English and Russian.
 
@@ -42,7 +42,7 @@ The tests do not replace a run in the game. The mock only checks that every tab 
 - All player texts exist in `ru` and `en` with the same keys (`tools/check.py` checks this).
 - Saved data lives in `storage.tr`, accessed only through `C.D()` in `scripts/core.lua`.
 - Nothing local may influence game state: this is a multiplayer mod.
-- Code comments are in Russian.
+- Code comments are in English.
 
 ## License
 
