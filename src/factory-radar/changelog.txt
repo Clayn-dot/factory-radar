@@ -2,12 +2,14 @@
 Version: 1.1.10
 Date: 2026-11-11
   Changes:
+    - Razi Protocol is now an optional dependency: with it installed, Factory Radar loads after it. Nothing else changes.
     - Shift report: the top planet now names its main builder, as intended (the name was always missing before).
     - Internal cleanup: the code is split into smaller parts and its comments are in English. The window works as before.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.10
 Date: 2026-11-11
   Changes:
+    - Razi Protocol is now an optional dependency: with it installed, Factory Radar loads after it. Nothing else changes.
     - Shift report: the top planet now names its main builder, as intended (the name was always missing before).
     - Internal cleanup: the code is split into smaller parts and its comments are in English. The window works as before.
 ---------------------------------------------------------------------------------------------------
