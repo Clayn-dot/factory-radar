@@ -76,7 +76,7 @@ def build(src, size):
     s = size / 288
     img = clean_background(Image.open(src).convert("RGB"), s)
     mask = title_mask(size, s)
-    outline = mask.filter(ImageFilter.MaxFilter(2 * round(3.5 * s) + 1)).filter(ImageFilter.GaussianBlur(0.45 * s)).point(lambda v: min(255, v * 2))
+    outline = mask.filter(ImageFilter.MaxFilter(2 * round(3 * s) + 1)).filter(ImageFilter.GaussianBlur(0.8 * s))  # same as the Quality Calculator avatar
     img.paste((0, 0, 0), (0, 0), outline)
     img.paste((255, 255, 255), (0, 0), mask)
     return img
