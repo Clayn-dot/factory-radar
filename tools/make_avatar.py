@@ -11,7 +11,8 @@ from scipy.ndimage import gaussian_filter, binary_dilation
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FINAL = ROOT / "release" / "final"
 FONT = "C:/dev/quality-calculator/fonts/BrukSans-Bold.ttf"
-LINES = (("FACTORY", 230, 42), ("RADAR", 150, 92))  # text, ink width and center y at 288 px
+LINES = (("FACTORY", 230, 42), ("RADAR", None, 92))  # text, ink width (None: smaller line) and center y at 288 px
+SMALL = 32 / 49  # second line size relative to the first, as in the Quality Calculator avatar
 
 
 def ink_box(text, f):
@@ -65,8 +66,10 @@ def clean_background(img, s):
 def title_mask(size, s):
     mask = Image.new("L", (size, size), 0)
     d = ImageDraw.Draw(mask)
+    first = None
     for text, width, yc in LINES:
-        f = fit(text, width * s)
+        f = fit(text, width * s) if width else ImageFont.truetype(FONT, round(first.size * SMALL))
+        first = first or f
         l, top, r, bot = ink_box(text, f)
         d.text(((size - (r - l)) / 2 - (l - 50), yc * s - ((top + bot) / 2 - 50)), text, font=f, fill=255)
     return mask
