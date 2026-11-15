@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.12
+Date: 2026-11-15
+  Changes:
+    - Five new titles: Lab Rat, Fire Starter, Belt Whisperer, Lamplighter, One-Way Ticket.
+    - Current cover image.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.12
+Date: 2026-11-15
+  Changes:
+    - Five new titles: Lab Rat, Fire Starter, Belt Whisperer, Lamplighter, One-Way Ticket.
+    - Current cover image.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.11
 Date: 2026-11-13
   Changes:

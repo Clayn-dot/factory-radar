@@ -66,6 +66,11 @@ C.TITLES = {
   {id = "veteran", key = "online", n = 100},
   {id = "touch-grass", key = "online", n = 500},
   {id = "tea-break", key = "afk", n = 5},
+  {id = "lab-rat", key = "infinite", n = 5},
+  {id = "fire-starter", key = "pyro", n = 100},
+  {id = "belt-whisperer", key = "belts", n = 500},
+  {id = "lamplighter", key = "poles", n = 100},
+  {id = "one-way-ticket", key = "ride", n = 10000},
   -- named
   {id = "pentapod-hunter", key = "pentapod", n = 1000},
   {id = "italian", key = "belts", n = 10000},
